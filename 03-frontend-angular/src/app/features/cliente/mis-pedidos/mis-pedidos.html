@@ -1,0 +1,46 @@
+<div class="container">
+  <div class="titulo-pagina">
+    <h1>{{ 'misPedidos.titulo' | translate }}</h1>
+    <p>{{ 'misPedidos.subtitulo' | translate }}</p>
+  </div>
+
+  @if (pedidos.misPedidos().length === 0) {
+    <div class="card text-center py-5">
+      <div class="display-4" aria-hidden="true">📦</div>
+      <p>{{ 'misPedidos.vacio' | translate }}</p>
+      <a routerLink="/catalogo" class="btn btn-primary mx-auto">{{ 'carrito.irCatalogo' | translate }}</a>
+    </div>
+  }
+
+  <div class="vstack gap-3">
+    @for (p of pedidos.misPedidos(); track p.id) {
+      <article class="card tarjeta-sombra" [class.border-primary]="activo(p)">
+        <div class="card-body">
+          <div class="d-flex flex-wrap justify-content-between gap-2 align-items-start">
+            <div>
+              <h2 class="h5 fw-bold mb-1">{{ p.codigo }}</h2>
+              <p class="small text-body-secondary mb-2">{{ p.fecha | date: 'medium' }} · {{ 'pago.' + p.metodoPago | translate }} · {{ 'origen.' + p.origen | translate }}</p>
+            </div>
+            <app-estado-badge [estado]="p.estado" />
+          </div>
+          <p class="mb-2">
+            @for (i of p.items; track i.productoId; let ultimo = $last) {
+              <span aria-hidden="true"><app-foto-producto [imagen]="i.imagen" [enLinea]="true" /></span> {{ i.cantidad }} × {{ i.nombre }}@if (!ultimo) {, }
+            }
+          </p>
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <span class="fs-5 fw-bold">{{ p.total | cop }}</span>
+            <div class="d-flex gap-2">
+              @if (activo(p)) {
+                <a [routerLink]="['/seguimiento', p.id]" class="btn btn-primary"><i class="bi bi-geo-alt me-1" aria-hidden="true"></i>{{ 'misPedidos.seguir' | translate }}</a>
+              } @else {
+                <a [routerLink]="['/seguimiento', p.id]" class="btn btn-outline-secondary">{{ 'misPedidos.detalle' | translate }}</a>
+              }
+              <button type="button" class="btn btn-outline-primary" (click)="repetir(p)"><i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i>{{ 'misPedidos.repetir' | translate }}</button>
+            </div>
+          </div>
+        </div>
+      </article>
+    }
+  </div>
+</div>

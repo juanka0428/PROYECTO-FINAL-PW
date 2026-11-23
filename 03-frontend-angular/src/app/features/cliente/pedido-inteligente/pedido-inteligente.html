@@ -1,0 +1,134 @@
+<div class="container">
+  <div class="titulo-pagina">
+    <h1><i class="bi bi-stars text-primario me-1" aria-hidden="true"></i>{{ 'ia.titulo' | translate }}</h1>
+    <p>{{ 'ia.subtitulo' | translate }}</p>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <div class="card tarjeta-sombra">
+        <div class="card-header bg-white">
+          <ul class="nav nav-pills nav-fill" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button type="button" class="nav-link" role="tab" [class.active]="modo() === 'texto'" [attr.aria-selected]="modo() === 'texto'" (click)="cambiarModo('texto')">
+                <i class="bi bi-pencil me-1" aria-hidden="true"></i>{{ 'ia.escribir' | translate }}
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button type="button" class="nav-link" role="tab" [class.active]="modo() === 'voz'" [attr.aria-selected]="modo() === 'voz'" (click)="cambiarModo('voz')">
+                <i class="bi bi-mic me-1" aria-hidden="true"></i>{{ 'ia.hablar' | translate }}
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button type="button" class="nav-link" role="tab" [class.active]="modo() === 'foto'" [attr.aria-selected]="modo() === 'foto'" (click)="cambiarModo('foto')">
+                <i class="bi bi-camera me-1" aria-hidden="true"></i>{{ 'ia.foto' | translate }}
+              </button>
+            </li>
+          </ul>
+        </div>
+        <div class="card-body p-4" role="tabpanel">
+          @switch (modo()) {
+            @case ('texto') {
+              <label for="texto-pedido" class="form-label fw-semibold">{{ 'ia.queNecesitas' | translate }}</label>
+              <textarea id="texto-pedido" class="form-control form-control-lg" rows="4" [ngModel]="texto()" (ngModelChange)="texto.set($event)"
+                        [placeholder]="'ia.ejemplo1' | translate" aria-describedby="ayuda-texto"></textarea>
+              <div id="ayuda-texto" class="form-text">{{ 'ia.ayudaTexto' | translate }}</div>
+              <div class="d-flex flex-wrap gap-2 my-3">
+                @for (e of ejemplos; track e) {
+                  <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" (click)="usarEjemplo(e)">“{{ e | translate }}”</button>
+                }
+              </div>
+              <button type="button" class="btn btn-primary btn-lg w-100" (click)="interpretar()" [disabled]="!texto().trim() || procesando()">
+                @if (procesando()) { <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>{{ 'ia.pensando' | translate }} }
+                @else { <i class="bi bi-magic me-1" aria-hidden="true"></i>{{ 'ia.armar' | translate }} }
+              </button>
+            }
+            @case ('voz') {
+              <div class="text-center py-3">
+                @if (vozDisponible) {
+                  <button type="button" class="btn boton-voz" [class.escuchando]="escuchando()" (click)="alternarVoz()"
+                          [attr.aria-pressed]="escuchando()" [attr.aria-label]="(escuchando() ? 'ia.detener' : 'ia.empezar') | translate">
+                    <i class="bi" [class.bi-mic-fill]="!escuchando()" [class.bi-stop-fill]="escuchando()" aria-hidden="true"></i>
+                  </button>
+                  <p class="mt-3 fw-semibold" aria-live="polite">{{ (escuchando() ? 'ia.escuchando' : 'ia.tocaParaHablar') | translate }}</p>
+                  @if (texto()) {
+                    <blockquote class="blockquote border rounded p-3 bg-white fs-6">“{{ texto() }}”</blockquote>
+                  }
+                } @else {
+                  <div class="alert alert-warning text-start">{{ 'ia.vozNoDisponible' | translate }}</div>
+                  <button type="button" class="btn btn-outline-primary" (click)="cambiarModo('texto')">{{ 'ia.mejorEscribir' | translate }}</button>
+                }
+              </div>
+            }
+            @case ('foto') {
+              <p class="mb-2">{{ 'ia.fotoTexto' | translate }}</p>
+              <label for="foto" class="zona-foto d-block text-center p-4 rounded mb-3">
+                @if (vistaPrevia()) {
+                  <img [src]="vistaPrevia()" class="img-fluid rounded" style="max-height: 240px" [alt]="'ia.fotoAlt' | translate" />
+                } @else {
+                  <i class="bi bi-image fs-1 d-block mb-2" aria-hidden="true"></i>
+                  <span class="fw-semibold">{{ 'ia.elegirFoto' | translate }}</span>
+                }
+              </label>
+              <input id="foto" type="file" accept="image/*" capture="environment" class="form-control" (change)="elegirFoto($event)" />
+              <button type="button" class="btn btn-primary btn-lg w-100 mt-3" (click)="leerFoto()" [disabled]="!vistaPrevia() || procesando()">
+                @if (procesando()) { <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>{{ 'ia.leyendo' | translate }} }
+                @else { <i class="bi bi-eye me-1" aria-hidden="true"></i>{{ 'ia.leerLista' | translate }} }
+              </button>
+              <p class="small text-body-secondary mt-2 mb-0"><i class="bi bi-info-circle me-1" aria-hidden="true"></i>{{ 'ia.fotoNota' | translate }}</p>
+            }
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <section class="card tarjeta-sombra h-100" aria-live="polite" [attr.aria-busy]="procesando()">
+        <div class="card-body p-4">
+          <h2 class="h5 fw-bold"><i class="bi bi-robot me-1" aria-hidden="true"></i>{{ 'ia.resultado' | translate }}</h2>
+          @if (items() === null) {
+            <div class="text-center text-body-secondary py-5">
+              <div class="display-4" aria-hidden="true">🧺</div>
+              <p class="mb-0">{{ 'ia.resultadoVacio' | translate }}</p>
+            </div>
+          } @else {
+            @if (texto()) { <p class="small text-body-secondary">{{ 'ia.entendi' | translate }}: “{{ texto() }}”</p> }
+            @if (usoUltimo()) {
+              <div class="alert alert-info py-2 small"><i class="bi bi-clock-history me-1" aria-hidden="true"></i>{{ 'ia.usoUltimo' | translate }}</div>
+            }
+            @if (items()!.length === 0) {
+              <div class="alert alert-warning">{{ 'ia.nadaReconocido' | translate }}</div>
+            } @else {
+              <ul class="list-group mb-3">
+                @for (it of items(); track it.productoId; let i = $index) {
+                  <li class="list-group-item d-flex align-items-center gap-2">
+                    <span class="img-producto pequena" aria-hidden="true"><app-foto-producto [imagen]="it.imagen" /></span>
+                    <span class="flex-grow-1">{{ it.nombre }}<br /><small class="text-body-secondary">{{ it.precio | cop }}</small></span>
+                    <div class="input-group input-group-sm w-auto" role="group" [attr.aria-label]="('catalogo.cantidadDe' | translate) + ' ' + it.nombre">
+                      <button type="button" class="btn btn-outline-primary" (click)="cambiarCantidad(i, it.cantidad - 1)" [attr.aria-label]="'catalogo.menos' | translate">−</button>
+                      <span class="form-control text-center" style="width: 2.75rem">{{ it.cantidad }}</span>
+                      <button type="button" class="btn btn-outline-primary" (click)="cambiarCantidad(i, it.cantidad + 1)" [attr.aria-label]="'catalogo.mas' | translate">+</button>
+                    </div>
+                  </li>
+                }
+              </ul>
+              <p class="d-flex justify-content-between fw-bold fs-5"><span>{{ 'carrito.subtotal' | translate }}</span><span>{{ total() | cop }}</span></p>
+            }
+            @if (noReconocidos().length) {
+              <div class="alert alert-light border small">
+                <strong>{{ 'ia.noEncontre' | translate }}:</strong> {{ noReconocidos().join(', ') }}.
+                <a routerLink="/chat">{{ 'ia.preguntarAsesor' | translate }}</a>
+              </div>
+            }
+            @if (items()!.length) {
+              <div class="d-grid gap-2 d-sm-flex">
+                <button type="button" class="btn btn-primary flex-fill" (click)="agregarAlCarrito(true)"><i class="bi bi-bag-check me-1" aria-hidden="true"></i>{{ 'ia.pedirYa' | translate }}</button>
+                <button type="button" class="btn btn-outline-primary flex-fill" (click)="agregarAlCarrito(false)">{{ 'ia.alCarrito' | translate }}</button>
+              </div>
+            }
+          }
+        </div>
+      </section>
+    </div>
+  </div>
+</div>

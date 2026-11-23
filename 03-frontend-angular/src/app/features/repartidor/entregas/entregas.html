@@ -1,0 +1,72 @@
+<div class="container">
+  <div class="titulo-pagina">
+    <h1><i class="bi bi-scooter text-primario me-1" aria-hidden="true"></i>{{ 'repartidor.titulo' | translate }}</h1>
+    <p>{{ 'repartidor.subtitulo' | translate: { n: activas().length, hoy: entregadasHoy().length } }}</p>
+  </div>
+
+  @if (activas().length === 0) {
+    <div class="card text-center py-5">
+      <div class="display-4" aria-hidden="true">☕</div>
+      <p class="mb-0">{{ 'repartidor.sinEntregas' | translate }}</p>
+    </div>
+  } @else {
+    <div class="row g-4">
+      <div class="col-lg-5 order-2 order-lg-1 vstack gap-3">
+        @for (p of activas(); track p.id) {
+          <article class="card tarjeta-sombra" [class.border-primary]="seleccionada()?.id === p.id" [class.border-2]="seleccionada()?.id === p.id">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <button type="button" class="btn btn-link p-0 h6 fw-bold text-start text-decoration-none" (click)="seleccionadaId.set(p.id)" [attr.aria-pressed]="seleccionada()?.id === p.id">
+                  {{ p.codigo }} · {{ p.clienteNombre }}
+                </button>
+                <app-estado-badge [estado]="p.estado" />
+              </div>
+              <p class="mb-1"><i class="bi bi-geo-alt me-1" aria-hidden="true"></i>{{ p.direccion }}, {{ p.barrio }}</p>
+              <p class="mb-1"><i class="bi bi-telephone me-1" aria-hidden="true"></i><a [href]="'tel:' + p.telefono.replace(' ', '')">{{ p.telefono }}</a></p>
+              <p class="mb-2 small">
+                {{ 'repartidor.cobrar' | translate }}:
+                @if (p.estadoPago === 'PENDIENTE') { <strong class="text-danger">{{ p.total | cop }}</strong> }
+                @else { <strong class="text-success">{{ 'estadoPago.' + p.estadoPago | translate }}</strong> }
+              </p>
+              @if (p.notas) { <p class="small mb-2"><i class="bi bi-sticky me-1" aria-hidden="true"></i>{{ p.notas }}</p> }
+              <details class="small mb-3">
+                <summary>{{ 'repartidor.verProductos' | translate: { n: p.items.length } }}</summary>
+                <ul class="mb-0 mt-1">@for (i of p.items; track i.productoId) { <li>{{ i.cantidad }} × {{ i.nombre }}</li> }</ul>
+              </details>
+              <div class="d-grid gap-2">
+                @if (p.estado !== 'EN_CAMINO') {
+                  <button type="button" class="btn btn-primary btn-lg" (click)="iniciar(p)" [disabled]="p.estado === 'RECIBIDO'">
+                    <i class="bi bi-play-fill me-1" aria-hidden="true"></i>{{ 'repartidor.iniciar' | translate }}
+                  </button>
+                  @if (p.estado === 'RECIBIDO') { <p class="small text-body-secondary mb-0">{{ 'repartidor.esperaPreparacion' | translate }}</p> }
+                } @else {
+                  <button type="button" class="btn btn-success btn-lg" (click)="entregar(p)"><i class="bi bi-check2-circle me-1" aria-hidden="true"></i>{{ 'repartidor.entregar' | translate }}</button>
+                  <div class="d-flex gap-2">
+                    <a class="btn btn-outline-primary flex-fill" [href]="enlaceNavegacion(p)" target="_blank" rel="noopener"><i class="bi bi-sign-turn-right me-1" aria-hidden="true"></i>{{ 'repartidor.navegar' | translate }}</a>
+                    @if (compartiendo() === 'no') {
+                      <button type="button" class="btn btn-outline-secondary flex-fill" (click)="compartirGps(p)"><i class="bi bi-broadcast me-1" aria-hidden="true"></i>GPS</button>
+                      <button type="button" class="btn btn-outline-secondary flex-fill" (click)="simular(p)"><i class="bi bi-cpu me-1" aria-hidden="true"></i>{{ 'repartidor.simular' | translate }}</button>
+                    } @else {
+                      <button type="button" class="btn btn-outline-danger flex-fill" (click)="detener()"><i class="bi bi-stop-circle me-1" aria-hidden="true"></i>{{ 'repartidor.detener' | translate }}</button>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+      <div class="col-lg-7 order-1 order-lg-2">
+        <div class="position-sticky" style="top: 1rem">
+          @if (compartiendo() !== 'no') {
+            <div class="alert alert-success py-2 small" role="status">
+              <span class="spinner-grow spinner-grow-sm me-1" aria-hidden="true"></span>
+              {{ (compartiendo() === 'gps' ? 'repartidor.compartiendoGps' : 'repartidor.compartiendoSimulado') | translate }}
+            </div>
+          }
+          <app-mapa [puntos]="puntos()" [ruta]="ruta()" [ajustar]="false" [descripcion]="'repartidor.mapa' | translate" style="--alto: 360px" />
+        </div>
+      </div>
+    </div>
+  }
+</div>

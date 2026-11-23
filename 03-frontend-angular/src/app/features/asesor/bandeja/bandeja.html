@@ -1,0 +1,79 @@
+<div class="container">
+  <div class="titulo-pagina">
+    <h1><i class="bi bi-headset text-primario me-1" aria-hidden="true"></i>{{ 'asesor.titulo' | translate }}</h1>
+    <p>{{ 'asesor.subtitulo' | translate: { n: chat.pendientes() } }}</p>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-4">
+      <div class="btn-group w-100 mb-3" role="group">
+        <button type="button" class="btn btn-outline-primary" [class.active]="filtro() === 'abiertas'" [attr.aria-pressed]="filtro() === 'abiertas'" (click)="filtro.set('abiertas')">{{ 'asesor.abiertas' | translate }}</button>
+        <button type="button" class="btn btn-outline-primary" [class.active]="filtro() === 'cerradas'" [attr.aria-pressed]="filtro() === 'cerradas'" (click)="filtro.set('cerradas')">{{ 'asesor.cerradas' | translate }}</button>
+      </div>
+      <div class="list-group tarjeta-sombra">
+        @for (c of lista(); track c.id) {
+          <button type="button" class="list-group-item list-group-item-action" [class.active]="seleccionadaId() === c.id" [attr.aria-current]="seleccionadaId() === c.id" (click)="seleccionadaId.set(c.id)">
+            <div class="d-flex justify-content-between">
+              <strong>{{ c.clienteNombre }}</strong>
+              <small>{{ c.actualizada | date: 'shortTime' }}</small>
+            </div>
+            <div class="small text-truncate">{{ c.mensajes.at(-1)?.texto }}</div>
+            @if (c.estado === 'ESPERANDO_ASESOR') { <span class="badge bg-acento mt-1">{{ 'asesor.esperando' | translate }}</span> }
+            @else if (c.estado === 'CON_ASESOR') { <span class="badge text-bg-success mt-1">{{ c.asesorNombre }}</span> }
+          </button>
+        } @empty {
+          <div class="list-group-item text-body-secondary">{{ 'asesor.vacio' | translate }}</div>
+        }
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      @if (seleccionada(); as c) {
+        <div class="card tarjeta-sombra">
+          <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <h2 class="h6 fw-bold mb-0">{{ c.clienteNombre }}</h2>
+            <div class="d-flex gap-2">
+              @if (c.estado === 'ESPERANDO_ASESOR') {
+                <button type="button" class="btn btn-sm btn-primary" (click)="chat.tomar(c.id)"><i class="bi bi-hand-index me-1" aria-hidden="true"></i>{{ 'asesor.tomar' | translate }}</button>
+              }
+              @if (c.estado !== 'CERRADA') {
+                <button type="button" class="btn btn-sm btn-outline-secondary" (click)="cerrar()">{{ 'asesor.cerrar' | translate }}</button>
+              }
+            </div>
+          </div>
+          <div class="card-body">
+            @if (contexto(); as ctx) {
+              <div class="d-flex flex-wrap gap-3 small mb-3 p-2 rounded bg-white border">
+                <span><i class="bi bi-telephone me-1" aria-hidden="true"></i>{{ ctx.cliente?.telefono }}</span>
+                <span><i class="bi bi-journal-text me-1" aria-hidden="true"></i>{{ 'fiado.debe' | translate }}: {{ ctx.cliente?.saldoFiado | cop }} / {{ ctx.cliente?.cupoFiado | cop }}</span>
+                @if (ctx.ultimo) {
+                  <span><i class="bi bi-receipt me-1" aria-hidden="true"></i>{{ ctx.ultimo.codigo }} <app-estado-badge [estado]="ctx.ultimo.estado" /></span>
+                }
+              </div>
+            }
+            <app-lista-mensajes [mensajes]="c.mensajes" propio="ASESOR" [nombreCliente]="c.clienteNombre" />
+            @if (c.estado === 'CON_ASESOR' && esMia(c)) {
+              <div class="d-flex flex-wrap gap-2 mt-3">
+                @for (r of respuestasRapidas; track r) {
+                  <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" (click)="enviarRapida(r)">{{ r | translate }}</button>
+                }
+              </div>
+              <form class="d-flex gap-2 mt-3" (ngSubmit)="enviar()">
+                <label for="resp" class="visually-hidden">{{ 'chat.escribe' | translate }}</label>
+                <input id="resp" name="resp" class="form-control" [(ngModel)]="texto" autocomplete="off" [placeholder]="'chat.escribe' | translate" />
+                <button type="submit" class="btn btn-primary" [attr.aria-label]="'chat.enviar' | translate"><i class="bi bi-send-fill" aria-hidden="true"></i></button>
+              </form>
+            } @else if (c.estado === 'ESPERANDO_ASESOR') {
+              <p class="small text-body-secondary mt-3 mb-0">{{ 'asesor.tomaPrimero' | translate }}</p>
+            }
+          </div>
+        </div>
+      } @else {
+        <div class="card text-center py-5 text-body-secondary">
+          <div class="display-4" aria-hidden="true">💬</div>
+          <p class="mb-0">{{ 'asesor.elige' | translate }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>

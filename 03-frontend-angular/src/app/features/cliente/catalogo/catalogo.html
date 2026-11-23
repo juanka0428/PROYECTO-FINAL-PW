@@ -1,0 +1,98 @@
+<section class="hero">
+  <div class="container py-4 py-md-5">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-7">
+        <h1 class="fw-bold display-6 mb-2">{{ 'catalogo.titulo' | translate }}</h1>
+        <p class="lead mb-3">{{ 'catalogo.subtitulo' | translate }}</p>
+        <div class="d-flex flex-wrap gap-2">
+          <a routerLink="/pedido-inteligente" class="btn btn-acento btn-lg"><i class="bi bi-mic-fill me-2" aria-hidden="true"></i>{{ 'catalogo.pedirVoz' | translate }}</a>
+          <a routerLink="/pedido-inteligente" [queryParams]="{ modo: 'foto' }" class="btn btn-outline-light btn-lg"><i class="bi bi-camera me-2" aria-hidden="true"></i>{{ 'catalogo.pedirFoto' | translate }}</a>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <ul class="list-unstyled ventajas mb-0">
+          <li><i class="bi bi-journal-check" aria-hidden="true"></i>{{ 'catalogo.ventaja1' | translate }}</li>
+          <li><i class="bi bi-geo-alt" aria-hidden="true"></i>{{ 'catalogo.ventaja2' | translate }}</li>
+          <li><i class="bi bi-robot" aria-hidden="true"></i>{{ 'catalogo.ventaja3' | translate }}</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+  <div class="row g-3 align-items-end py-4">
+    <div class="col-md-6 col-lg-5">
+      <label for="buscar" class="form-label fw-semibold">{{ 'catalogo.buscar' | translate }}</label>
+      <div class="input-group input-group-lg">
+        <span class="input-group-text bg-white"><i class="bi bi-search" aria-hidden="true"></i></span>
+        <input id="buscar" type="search" class="form-control" [value]="busqueda()" (input)="buscar($event)" [placeholder]="'catalogo.buscarEjemplo' | translate" />
+      </div>
+    </div>
+  </div>
+
+  <nav class="categorias d-flex gap-2 pb-3 mb-3" [attr.aria-label]="'catalogo.categorias' | translate">
+    <button type="button" class="btn rounded-pill" [class.btn-primary]="!categoria()" [class.btn-outline-primary]="categoria()"
+            [attr.aria-pressed]="!categoria()" (click)="categoria.set(null)">{{ 'catalogo.todas' | translate }}</button>
+    @for (c of productos.categorias(); track c.id) {
+      <button type="button" class="btn rounded-pill text-nowrap" [class.btn-primary]="categoria() === c.id" [class.btn-outline-primary]="categoria() !== c.id"
+              [attr.aria-pressed]="categoria() === c.id" (click)="categoria.set(c.id)">
+        <span aria-hidden="true">{{ c.icono }}</span> {{ 'cat.' + c.id | translate }}
+      </button>
+    }
+  </nav>
+
+  <p class="visually-hidden" aria-live="polite">{{ 'catalogo.resultados' | translate: { n: filtrados().length } }}</p>
+
+  @if (filtrados().length === 0) {
+    <div class="text-center py-5 text-body-secondary">
+      <div class="display-4" aria-hidden="true">🔍</div>
+      <p>{{ 'catalogo.sinResultados' | translate }}</p>
+      <a routerLink="/pedido-inteligente" class="btn btn-outline-primary">{{ 'catalogo.probarIa' | translate }}</a>
+    </div>
+  }
+
+  <ul class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-3 list-unstyled">
+    @for (p of filtrados(); track p.id) {
+      <li class="col">
+        <article class="card h-100 producto tarjeta-sombra">
+          <div class="card-body d-flex flex-column">
+            <div class="img-producto mb-3" role="img" [attr.aria-label]="p.nombre"><app-foto-producto [imagen]="p.imagen" /></div>
+            <p class="small text-body-secondary mb-1">{{ 'cat.' + p.categoriaId | translate }}</p>
+            <h2 class="h6 fw-bold mb-1">{{ p.nombre }}</h2>
+            <p class="fs-5 fw-bold text-primario mb-2">{{ p.precio | cop }}</p>
+            @if (p.stock === 0) {
+              <span class="badge text-bg-secondary align-self-start mt-auto">{{ 'catalogo.agotado' | translate }}</span>
+            } @else {
+              @if (p.stock <= p.stockMinimo) {
+                <p class="small text-danger mb-2"><i class="bi bi-exclamation-circle me-1" aria-hidden="true"></i>{{ 'catalogo.ultimas' | translate: { n: p.stock } }}</p>
+              }
+              <div class="mt-auto">
+                @if (carrito.cantidadDe(p.id); as cant) {
+                  <div class="input-group" role="group" [attr.aria-label]="('catalogo.cantidadDe' | translate) + ' ' + p.nombre">
+                    <button type="button" class="btn btn-outline-primary" (click)="carrito.cambiarCantidad(p.id, cant - 1)" [attr.aria-label]="'catalogo.menos' | translate">−</button>
+                    <span class="form-control text-center fw-bold" aria-live="polite">{{ cant }}</span>
+                    <button type="button" class="btn btn-outline-primary" (click)="carrito.cambiarCantidad(p.id, cant + 1)" [disabled]="cant >= p.stock" [attr.aria-label]="'catalogo.mas' | translate">+</button>
+                  </div>
+                } @else {
+                  <button type="button" class="btn btn-primary w-100" (click)="agregar(p)">
+                    <i class="bi bi-cart-plus me-1" aria-hidden="true"></i>{{ 'catalogo.agregar' | translate }}<span class="visually-hidden"> {{ p.nombre }}</span>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        </article>
+      </li>
+    }
+  </ul>
+</div>
+
+@if (carrito.cantidadTotal() > 0) {
+  <div class="barra-carrito d-lg-none">
+    <a routerLink="/carrito" class="btn btn-primary btn-lg w-100 d-flex justify-content-between">
+      <span><i class="bi bi-cart3 me-2" aria-hidden="true"></i>{{ 'catalogo.verCarrito' | translate }} ({{ carrito.cantidadTotal() }})</span>
+      <span>{{ carrito.total() | cop }}</span>
+    </a>
+  </div>
+}

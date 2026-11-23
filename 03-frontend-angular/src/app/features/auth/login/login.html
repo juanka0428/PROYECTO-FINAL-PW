@@ -1,0 +1,71 @@
+<div class="container py-5">
+  <div class="row justify-content-center g-4">
+    <div class="col-lg-5 d-none d-lg-block">
+      <img src="img/cosecha.jpg" class="foto-lateral" alt="Cosecha de albahaca en el Huila" />
+    </div>
+    <div class="col-md-8 col-lg-5">
+      <div class="card tarjeta-sombra">
+        <div class="card-body p-4 p-md-5">
+          <h1 class="h3 fw-bold mb-1">{{ 'auth.tituloLogin' | translate }}</h1>
+          <p class="text-body-secondary mb-4">{{ 'auth.subtituloLogin' | translate }}</p>
+
+          @if (error()) {
+            <div class="alert alert-danger" role="alert">{{ error()! | translate }}</div>
+          }
+
+          <form [formGroup]="form" (ngSubmit)="enviar()" novalidate>
+            <div class="mb-3">
+              <label for="correo" class="form-label">{{ 'auth.correo' | translate }}</label>
+              <input id="correo" type="email" class="form-control form-control-lg" formControlName="correo" autocomplete="email"
+                     [class.is-invalid]="form.controls.correo.touched && form.controls.correo.invalid"
+                     aria-describedby="correo-error" />
+              <div id="correo-error" class="invalid-feedback">{{ 'validacion.correo' | translate }}</div>
+            </div>
+            <div class="mb-3">
+              <label for="clave" class="form-label">{{ 'auth.clave' | translate }}</label>
+              <div class="input-group">
+                <input id="clave" [type]="verClave() ? 'text' : 'password'" class="form-control form-control-lg" formControlName="clave"
+                       autocomplete="current-password" [class.is-invalid]="form.controls.clave.touched && form.controls.clave.invalid"
+                       aria-describedby="clave-error" />
+                <button type="button" class="btn btn-outline-secondary" (click)="verClave.set(!verClave())"
+                        [attr.aria-label]="(verClave() ? 'auth.ocultarClave' : 'auth.verClave') | translate" [attr.aria-pressed]="verClave()">
+                  <i class="bi" [class.bi-eye]="!verClave()" [class.bi-eye-slash]="verClave()" aria-hidden="true"></i>
+                </button>
+                <div id="clave-error" class="invalid-feedback">{{ 'validacion.clave' | translate }}</div>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg w-100" [disabled]="cargando()">
+              @if (cargando()) { <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span> }
+              {{ 'auth.entrar' | translate }}
+            </button>
+          </form>
+
+          <div class="d-flex align-items-center gap-2 my-3 text-body-secondary small">
+            <hr class="flex-grow-1" /> {{ 'auth.o' | translate }} <hr class="flex-grow-1" />
+          </div>
+
+          <button type="button" class="btn btn-outline-dark btn-lg w-100" (click)="conGoogle()" [disabled]="cargando()">
+            <i class="bi bi-google me-2" aria-hidden="true"></i>{{ 'auth.google' | translate }}
+          </button>
+          <p class="small text-body-secondary mt-2 mb-0">{{ 'auth.googleNota' | translate }}</p>
+
+          <p class="mt-4 mb-0 text-center">
+            {{ 'auth.sinCuenta' | translate }} <a routerLink="/registro">{{ 'auth.creaCuenta' | translate }}</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="card mt-3 border-dashed">
+        <div class="card-body">
+          <h2 class="h6 fw-bold"><i class="bi bi-person-badge me-1" aria-hidden="true"></i>{{ 'auth.cuentasPrueba' | translate }}</h2>
+          <p class="small text-body-secondary mb-2">{{ 'auth.cuentasPruebaNota' | translate }}</p>
+          <div class="d-flex flex-wrap gap-2">
+            @for (d of demos; track d.correo) {
+              <button type="button" class="btn btn-sm btn-outline-primary" (click)="usarDemo(d.correo)">{{ 'roles.' + d.rol | translate }}</button>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

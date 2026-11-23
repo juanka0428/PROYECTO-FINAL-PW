@@ -1,0 +1,107 @@
+<div class="container">
+  <div class="titulo-pagina">
+    <h1>{{ 'carrito.titulo' | translate }}</h1>
+    <p>{{ 'carrito.subtitulo' | translate }}</p>
+  </div>
+
+  @if (carrito.items().length === 0) {
+    <div class="card text-center py-5">
+      <div class="display-3" aria-hidden="true">🛒</div>
+      <p class="lead">{{ 'carrito.vacio' | translate }}</p>
+      <div class="d-flex justify-content-center gap-2 flex-wrap">
+        <a routerLink="/catalogo" class="btn btn-primary">{{ 'carrito.irCatalogo' | translate }}</a>
+        <a routerLink="/pedido-inteligente" class="btn btn-outline-primary">{{ 'carrito.irIa' | translate }}</a>
+      </div>
+    </div>
+  } @else {
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="card tarjeta-sombra">
+          <ul class="list-group list-group-flush">
+            @for (i of carrito.items(); track i.productoId) {
+              <li class="list-group-item py-3">
+                <div class="d-flex gap-3 align-items-center flex-wrap">
+                  <div class="img-producto pequena" aria-hidden="true"><app-foto-producto [imagen]="i.imagen" /></div>
+                  <div class="flex-grow-1">
+                    <div class="fw-semibold">{{ i.nombre }}</div>
+                    <div class="small text-body-secondary">{{ i.precio | cop }} {{ 'carrito.cadaUno' | translate }}</div>
+                  </div>
+                  <div class="input-group w-auto" role="group" [attr.aria-label]="('catalogo.cantidadDe' | translate) + ' ' + i.nombre">
+                    <button type="button" class="btn btn-outline-primary" (click)="carrito.cambiarCantidad(i.productoId, i.cantidad - 1)" [attr.aria-label]="'catalogo.menos' | translate">−</button>
+                    <span class="form-control text-center fw-bold" style="width: 3.5rem">{{ i.cantidad }}</span>
+                    <button type="button" class="btn btn-outline-primary" (click)="carrito.cambiarCantidad(i.productoId, i.cantidad + 1)" [attr.aria-label]="'catalogo.mas' | translate">+</button>
+                  </div>
+                  <div class="fw-bold text-end" style="min-width: 6rem">{{ i.precio * i.cantidad | cop }}</div>
+                  <button type="button" class="btn btn-link text-danger" (click)="carrito.quitar(i.productoId)" [attr.aria-label]="('carrito.quitar' | translate) + ' ' + i.nombre">
+                    <i class="bi bi-trash3" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </li>
+            }
+          </ul>
+        </div>
+        <div class="d-flex justify-content-between mt-3 flex-wrap gap-2">
+          <a routerLink="/catalogo" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>{{ 'carrito.seguir' | translate }}</a>
+          <button type="button" class="btn btn-outline-danger" (click)="carrito.vaciar()">{{ 'carrito.vaciar' | translate }}</button>
+        </div>
+
+        @if (auth.rol() === 'CLIENTE') {
+          <div class="card mt-4">
+            <div class="card-body">
+              <h2 class="h6 fw-bold"><i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i>{{ 'carrito.recurrenteTitulo' | translate }}</h2>
+              <p class="small text-body-secondary">{{ 'carrito.recurrenteTexto' | translate }}</p>
+              @if (!guardando()) {
+                <button type="button" class="btn btn-sm btn-outline-primary" (click)="guardando.set(true)">{{ 'carrito.guardarRecurrente' | translate }}</button>
+              } @else {
+                <form class="row g-2 align-items-end" (ngSubmit)="guardarRecurrente()">
+                  <div class="col-md-5">
+                    <label for="nr" class="form-label small">{{ 'recurrentes.nombre' | translate }}</label>
+                    <input id="nr" class="form-control form-control-sm" name="nombre" [(ngModel)]="nombreRecurrente" required [placeholder]="'recurrentes.nombreEjemplo' | translate" />
+                  </div>
+                  <div class="col-6 col-md-3">
+                    <label for="fr" class="form-label small">{{ 'recurrentes.frecuencia' | translate }}</label>
+                    <select id="fr" class="form-select form-select-sm" name="frecuencia" [(ngModel)]="frecuencia">
+                      <option value="SEMANAL">{{ 'recurrentes.SEMANAL' | translate }}</option>
+                      <option value="QUINCENAL">{{ 'recurrentes.QUINCENAL' | translate }}</option>
+                      <option value="MENSUAL">{{ 'recurrentes.MENSUAL' | translate }}</option>
+                    </select>
+                  </div>
+                  <div class="col-6 col-md-2">
+                    <label for="di" class="form-label small">{{ 'recurrentes.dia' | translate }}</label>
+                    <select id="di" class="form-select form-select-sm" name="dia" [(ngModel)]="dia">
+                      @for (d of dias; track d) { <option [value]="d">{{ 'dias.' + d | translate }}</option> }
+                    </select>
+                  </div>
+                  <div class="col-md-2"><button class="btn btn-sm btn-primary w-100" type="submit">{{ 'comun.guardar' | translate }}</button></div>
+                </form>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="col-lg-4">
+        <aside class="card tarjeta-sombra position-sticky" style="top: 1rem" [attr.aria-label]="'carrito.resumen' | translate">
+          <div class="card-body">
+            <h2 class="h5 fw-bold mb-3">{{ 'carrito.resumen' | translate }}</h2>
+            <dl class="row mb-0">
+              <dt class="col-7 fw-normal">{{ 'carrito.subtotal' | translate }}</dt><dd class="col-5 text-end">{{ carrito.subtotal() | cop }}</dd>
+              <dt class="col-7 fw-normal">{{ 'carrito.domicilio' | translate }}</dt>
+              <dd class="col-5 text-end">@if (carrito.domicilio() === 0) { <span class="text-success fw-semibold">{{ 'carrito.gratis' | translate }}</span> } @else { {{ carrito.domicilio() | cop }} }</dd>
+              <dt class="col-7 fs-5">{{ 'carrito.total' | translate }}</dt><dd class="col-5 text-end fs-5 fw-bold">{{ carrito.total() | cop }}</dd>
+            </dl>
+            @if (carrito.domicilio() > 0) {
+              <p class="small text-body-secondary mt-2">{{ 'carrito.faltaGratis' | translate: { valor: (config.domicilioGratisDesde - carrito.subtotal() | cop) } }}</p>
+            }
+            <button type="button" class="btn btn-primary btn-lg w-100 mt-2" (click)="continuar()">
+              {{ 'carrito.pagar' | translate }} <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
+            </button>
+            @if (!auth.autenticado()) {
+              <p class="small text-body-secondary mt-2 mb-0">{{ 'carrito.debesIngresar' | translate }}</p>
+            }
+          </div>
+        </aside>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,54 @@
+:root { --verde: #035a2c; --amarillo: #fccf00; --limon: #8cbf3f; --fondo: #f5f9ef; --suave: #e6f1da; --texto: #1b2e20; }
+@font-face { font-family: "Nunito"; font-weight: 400; src: url("../fuentes/nunito-latin-400-normal.woff2"); }
+@font-face { font-family: "Nunito"; font-weight: 700; src: url("../fuentes/nunito-latin-700-normal.woff2"); }
+@font-face { font-family: "Montserrat"; font-weight: 800; src: url("../fuentes/montserrat-latin-800-normal.woff2"); }
+
+body { background: var(--fondo); color: var(--texto); font-family: "Nunito", "Segoe UI", Arial, sans-serif; }
+h1, h2, h3, .numero { font-weight: 700; }
+.logo { font-family: "Montserrat", Arial, sans-serif; }
+.saltar { position: absolute; top: -3rem; left: .5rem; background: var(--amarillo); padding: .5rem 1rem; z-index: 2000; }
+.saltar:focus { top: .5rem; }
+:focus-visible { outline: 3px solid var(--amarillo); }
+
+.logo { font-weight: 800; font-size: 1.6rem; background: #fff; padding: .2rem .8rem; border-radius: 2rem; }
+.logo .agro { color: var(--limon); }
+.logo .pita { color: var(--verde); }
+.logo img { width: 1.4rem; vertical-align: -.15rem; }
+
+#barra { padding: 1rem 0; }
+#barra.solida { background: var(--verde); padding: .4rem 0; border-bottom: 4px solid var(--amarillo); }
+#barra .nav-link { color: #fff; }
+#barra .navbar-toggler-icon { filter: invert(1); }
+@media (max-width: 767px) { #barra .navbar-collapse { background: var(--verde); padding: 1rem; } }
+
+.btn-acento { background: var(--amarillo); font-weight: bold; }
+.btn-primario { background: var(--verde); color: #fff; }
+
+.hero { background: linear-gradient(rgba(3,90,44,.85), rgba(3,90,44,.85)), url("../img/cosecha.jpg") center / cover; padding: 8rem 0 5rem; border-bottom: 8px solid var(--amarillo); }
+.etiqueta { display: inline-block; background: var(--amarillo); color: var(--texto); padding: .2rem .8rem; border-radius: 1rem; font-weight: bold; }
+.telefono { background: #fff; border-radius: 1.5rem; padding: 1.5rem; max-width: 340px; margin: 0 auto; border: 8px solid var(--texto); }
+.burbuja { padding: .75rem 1rem; border-radius: 1rem; margin-bottom: .75rem; color: var(--texto); }
+.burbuja.cliente { background: var(--verde); color: #fff; margin-left: 2rem; }
+.burbuja.ia { background: var(--suave); margin-right: 2rem; }
+
+.cifras { background: var(--verde); color: #fff; }
+.numero { font-size: 3rem; color: var(--amarillo); margin: 0; }
+
+.titulo { color: var(--verde); font-weight: 700; margin-bottom: 2rem; }
+.titulo::before { content: ""; display: inline-block; width: 3rem; height: .8rem; background: var(--amarillo); margin-right: .75rem; }
+
+.paso { background: #fff; border-radius: 1rem; padding: 1.5rem; height: 100%; border-top: 5px solid var(--limon); }
+.paso .icono { font-size: 2.5rem; }
+.fondo-suave { background: var(--suave); }
+
+.faq .item { border-bottom: 1px solid #cfe0bd; }
+.pregunta { width: 100%; text-align: left; background: none; border: 0; padding: 1rem 0; font-weight: bold; font-size: 1.1rem; }
+.respuesta { display: none; padding-bottom: 1rem; }
+
+.pie { background: var(--verde); color: #fff; border-top: 6px solid var(--amarillo); }
+.pie strong { color: var(--amarillo); }
+#subir { position: fixed; right: 1rem; bottom: 1rem; display: none; border-radius: 50%; width: 3rem; height: 3rem; }
+
+.js .aparecer { opacity: 0; transition: opacity .6s; }
+.js .aparecer.visible { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .js .aparecer { opacity: 1; transition: none; } }

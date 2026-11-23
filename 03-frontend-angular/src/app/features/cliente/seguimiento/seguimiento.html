@@ -1,0 +1,69 @@
+<div class="container">
+  @if (pedido(); as p) {
+    <div class="titulo-pagina d-flex flex-wrap justify-content-between align-items-end gap-2">
+      <div>
+        <a routerLink="/mis-pedidos" class="small"><i class="bi bi-arrow-left" aria-hidden="true"></i> {{ 'nav.misPedidos' | translate }}</a>
+        <h1>{{ 'seguimiento.titulo' | translate }} {{ p.codigo }}</h1>
+        <p>{{ p.fecha | date: 'medium' }}</p>
+      </div>
+      <app-estado-badge [estado]="p.estado" />
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-8">
+        @if (minutosEstimados(); as min) {
+          <div class="alert alert-success d-flex align-items-center gap-2" role="status">
+            <i class="bi bi-scooter fs-4" aria-hidden="true"></i>
+            <div><strong>{{ 'seguimiento.enCamino' | translate: { nombre: p.repartidorNombre } }}</strong><br />{{ 'seguimiento.llegaEn' | translate: { min: min } }}</div>
+          </div>
+        } @else if (p.estado === 'ENTREGADO') {
+          <div class="alert alert-success" role="status"><i class="bi bi-check2-circle me-1" aria-hidden="true"></i>{{ 'seguimiento.entregado' | translate }}</div>
+        } @else if (p.estado === 'CANCELADO') {
+          <div class="alert alert-danger" role="status">{{ 'seguimiento.cancelado' | translate }}</div>
+        } @else {
+          <div class="alert alert-light border" role="status"><i class="bi bi-hourglass-split me-1" aria-hidden="true"></i>{{ 'seguimiento.preparando' | translate }}</div>
+        }
+
+        <app-mapa [puntos]="puntos()" [ruta]="ruta()" [descripcion]="'seguimiento.mapa' | translate" style="--alto: 380px" />
+        <p class="small text-body-secondary mt-2">
+          <span aria-hidden="true">🏪</span> {{ 'seguimiento.tienda' | translate }} ·
+          <span aria-hidden="true">🏠</span> {{ 'seguimiento.tuCasa' | translate }} ·
+          <span aria-hidden="true">🛵</span> {{ 'seguimiento.repartidor' | translate }}
+          @if (p.ubicacionRepartidor) { · {{ 'seguimiento.actualizado' | translate }} {{ p.ubicacionRepartidor.actualizado | date: 'mediumTime' }} }
+        </p>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card tarjeta-sombra mb-3">
+          <div class="card-body">
+            <h2 class="h6 fw-bold mb-3">{{ 'seguimiento.estado' | translate }}</h2>
+            <app-linea-tiempo [pedido]="p" />
+          </div>
+        </div>
+        <div class="card tarjeta-sombra mb-3">
+          <div class="card-body">
+            <h2 class="h6 fw-bold">{{ 'seguimiento.detalle' | translate }}</h2>
+            <ul class="list-unstyled small mb-2">
+              @for (i of p.items; track i.productoId) {
+                <li class="d-flex justify-content-between py-1"><span>{{ i.cantidad }} × {{ i.nombre }}</span><span>{{ i.precio * i.cantidad | cop }}</span></li>
+              }
+            </ul>
+            <div class="d-flex justify-content-between border-top pt-2 small"><span>{{ 'carrito.domicilio' | translate }}</span><span>{{ p.domicilio | cop }}</span></div>
+            <div class="d-flex justify-content-between fw-bold"><span>{{ 'carrito.total' | translate }}</span><span>{{ p.total | cop }}</span></div>
+            <p class="small mt-2 mb-0">{{ 'pago.' + p.metodoPago | translate }} · {{ 'estadoPago.' + p.estadoPago | translate }}</p>
+            @if (p.referenciaPago) {
+              <p class="small mb-0 text-body-secondary">{{ 'pedidos.referenciaPago' | translate }}: {{ p.referenciaPago }} · {{ p.tarjetaPago }}</p>
+            }
+            <p class="small mb-0"><i class="bi bi-geo-alt" aria-hidden="true"></i> {{ p.direccion }}, {{ p.barrio }}</p>
+          </div>
+        </div>
+        <a routerLink="/chat" class="btn btn-outline-primary w-100"><i class="bi bi-chat-dots me-1" aria-hidden="true"></i>{{ 'seguimiento.ayuda' | translate }}</a>
+      </div>
+    </div>
+  } @else {
+    <div class="py-5 text-center">
+      <p>{{ 'seguimiento.noEncontrado' | translate }}</p>
+      <a routerLink="/mis-pedidos" class="btn btn-primary">{{ 'nav.misPedidos' | translate }}</a>
+    </div>
+  }
+</div>

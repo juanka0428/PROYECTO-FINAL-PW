@@ -1,0 +1,81 @@
+<div class="mb-3">
+  <h1 class="h3 fw-bold mb-0">{{ 'tendero.clientes' | translate }}</h1>
+  <p class="text-body-secondary mb-0">{{ 'clientes.texto' | translate }}</p>
+</div>
+
+<div class="row g-4">
+  <div [class.col-xl-7]="seleccionado()" class="col-12">
+    <div class="card tarjeta-sombra">
+      <table class="table table-hover align-middle mb-0 tabla-responsive">
+        <caption class="visually-hidden">{{ 'tendero.clientes' | translate }}</caption>
+        <thead class="table-light">
+          <tr>
+            <th scope="col">{{ 'clientes.cliente' | translate }}</th>
+            <th scope="col" class="text-end">{{ 'fiado.cupo' | translate }}</th>
+            <th scope="col" class="text-end">{{ 'fiado.debe' | translate }}</th>
+            <th scope="col" class="text-end">{{ 'fiado.disponible' | translate }}</th>
+            <th scope="col"><span class="visually-hidden">{{ 'comun.acciones' | translate }}</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of fiado.clientes(); track c.id) {
+            <tr [class.table-active]="seleccionadoId() === c.id">
+              <td [attr.data-label]="'clientes.cliente' | translate">
+                <strong>{{ c.nombre }}</strong>
+                <div class="small text-body-secondary">{{ c.telefono }} · {{ c.barrio }}</div>
+              </td>
+              <td class="text-end" [attr.data-label]="'fiado.cupo' | translate">{{ c.cupoFiado | cop }}</td>
+              <td class="text-end fw-semibold" [class.text-danger]="(c.saldoFiado ?? 0) > 0" [attr.data-label]="'fiado.debe' | translate">{{ c.saldoFiado | cop }}</td>
+              <td class="text-end" [attr.data-label]="'fiado.disponible' | translate">{{ disponible(c) | cop }}</td>
+              <td class="text-end">
+                <button type="button" class="btn btn-sm btn-outline-primary" (click)="abrir(c)">{{ 'clientes.gestionar' | translate }}<span class="visually-hidden"> {{ c.nombre }}</span></button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  @if (seleccionado(); as c) {
+    <div class="col-xl-5">
+      <section class="card tarjeta-sombra" [attr.aria-label]="c.nombre">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h2 class="h6 fw-bold mb-0">{{ c.nombre }}</h2>
+          <button type="button" class="btn-close" (click)="seleccionadoId.set(null)" [attr.aria-label]="'comun.cerrar' | translate"></button>
+        </div>
+        <div class="card-body">
+          <form class="row g-2 align-items-end mb-3" (ngSubmit)="guardarCupo()">
+            <div class="col-8">
+              <label for="cupo" class="form-label small">{{ 'clientes.cupoAsignado' | translate }}</label>
+              <input id="cupo" type="number" min="0" step="1000" class="form-control" name="cupo" [(ngModel)]="nuevoCupo" />
+            </div>
+            <div class="col-4"><button class="btn btn-outline-primary w-100" type="submit">{{ 'comun.guardar' | translate }}</button></div>
+          </form>
+          <form class="row g-2 align-items-end mb-3" (ngSubmit)="registrarAbono()">
+            <div class="col-md-5">
+              <label for="abono" class="form-label small">{{ 'clientes.valorAbono' | translate }}</label>
+              <input id="abono" type="number" min="0" step="1000" class="form-control" name="abono" [(ngModel)]="abono" />
+            </div>
+            <div class="col-md-4">
+              <label for="desc-abono" class="form-label small">{{ 'comun.descripcion' | translate }}</label>
+              <input id="desc-abono" class="form-control" name="desc" [(ngModel)]="descripcionAbono" [placeholder]="'clientes.efectivo' | translate" />
+            </div>
+            <div class="col-md-3"><button class="btn btn-primary w-100" type="submit" [disabled]="!abono">{{ 'clientes.abonar' | translate }}</button></div>
+          </form>
+          <h3 class="h6 fw-bold">{{ 'fiado.movimientos' | translate }}</h3>
+          <ul class="list-group list-group-flush small">
+            @for (m of movimientos(); track m.id) {
+              <li class="list-group-item d-flex justify-content-between px-0">
+                <span>{{ m.fecha | date: 'shortDate' }} · {{ m.descripcion }}</span>
+                <span [class.text-danger]="m.tipo === 'CARGO'" [class.text-success]="m.tipo === 'ABONO'">{{ m.tipo === 'CARGO' ? '+' : '−' }} {{ m.valor | cop }}</span>
+              </li>
+            } @empty {
+              <li class="list-group-item px-0 text-body-secondary">{{ 'fiado.sinMovimientos' | translate }}</li>
+            }
+          </ul>
+        </div>
+      </section>
+    </div>
+  }
+</div>

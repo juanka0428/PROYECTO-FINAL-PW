@@ -1,0 +1,140 @@
+<div class="container">
+  <div class="titulo-pagina">
+    <h1>{{ 'checkout.titulo' | translate }}</h1>
+    <p>{{ 'checkout.subtitulo' | translate }}</p>
+  </div>
+
+  @if (carrito.items().length === 0) {
+    <div class="alert alert-info">{{ 'carrito.vacio' | translate }} <a routerLink="/catalogo" class="alert-link">{{ 'carrito.irCatalogo' | translate }}</a></div>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="confirmar()" novalidate class="row g-4">
+      <div class="col-lg-7">
+        <fieldset class="card tarjeta-sombra mb-4">
+          <div class="card-body">
+            <legend class="h5 fw-bold"><i class="bi bi-geo-alt me-1" aria-hidden="true"></i>{{ 'checkout.entrega' | translate }}</legend>
+            <div class="row g-3">
+              <div class="col-md-8">
+                <label for="direccion" class="form-label">{{ 'auth.direccion' | translate }}</label>
+                <input id="direccion" class="form-control" formControlName="direccion" autocomplete="street-address"
+                       [class.is-invalid]="form.controls.direccion.touched && form.controls.direccion.invalid" />
+                <div class="invalid-feedback">{{ 'validacion.requerido' | translate }}</div>
+              </div>
+              <div class="col-md-4">
+                <label for="barrio" class="form-label">{{ 'auth.barrio' | translate }}</label>
+                <input id="barrio" class="form-control" formControlName="barrio" [class.is-invalid]="form.controls.barrio.touched && form.controls.barrio.invalid" />
+                <div class="invalid-feedback">{{ 'validacion.requerido' | translate }}</div>
+              </div>
+              <div class="col-md-6">
+                <label for="telefono" class="form-label">{{ 'auth.telefono' | translate }}</label>
+                <input id="telefono" type="tel" class="form-control" formControlName="telefono" autocomplete="tel"
+                       [class.is-invalid]="form.controls.telefono.touched && form.controls.telefono.invalid" />
+                <div class="invalid-feedback">{{ 'validacion.telefono' | translate }}</div>
+              </div>
+              <div class="col-12">
+                <label for="notas" class="form-label">{{ 'checkout.notas' | translate }} <span class="text-body-secondary small">({{ 'comun.opcional' | translate }})</span></label>
+                <textarea id="notas" class="form-control" rows="2" formControlName="notas" [placeholder]="'checkout.notasEjemplo' | translate"></textarea>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="card tarjeta-sombra">
+          <div class="card-body">
+            <legend class="h5 fw-bold"><i class="bi bi-wallet2 me-1" aria-hidden="true"></i>{{ 'checkout.pago' | translate }}</legend>
+
+            <div class="vstack gap-2">
+              <label class="opcion-pago card p-3" [class.border-primary]="metodo() === 'CONTRA_ENTREGA'">
+                <span class="form-check m-0">
+                  <input class="form-check-input" type="radio" formControlName="metodoPago" value="CONTRA_ENTREGA" />
+                  <span class="form-check-label fw-semibold"><i class="bi bi-cash-coin me-1" aria-hidden="true"></i>{{ 'pago.CONTRA_ENTREGA' | translate }}</span>
+                </span>
+                <span class="small text-body-secondary ms-4">{{ 'checkout.contraEntregaTexto' | translate }}</span>
+              </label>
+
+              <label class="opcion-pago card p-3" [class.border-primary]="metodo() === 'EN_LINEA'">
+                <span class="form-check m-0">
+                  <input class="form-check-input" type="radio" formControlName="metodoPago" value="EN_LINEA" />
+                  <span class="form-check-label fw-semibold"><i class="bi bi-credit-card me-1" aria-hidden="true"></i>{{ 'pago.EN_LINEA' | translate }}</span>
+                </span>
+                <span class="small text-body-secondary ms-4">{{ 'checkout.enLineaTexto' | translate }}</span>
+              </label>
+              @if (metodo() === 'EN_LINEA') {
+                <div class="ms-md-4 p-3 rounded border bg-white" [formGroup]="tarjeta">
+                  <p class="fw-semibold mb-2"><i class="bi bi-credit-card-2-front me-1" aria-hidden="true"></i>{{ 'checkout.tarjeta' | translate }}</p>
+                  <div class="row g-2">
+                    <div class="col-12">
+                      <label for="titular" class="form-label small">{{ 'checkout.titular' | translate }}</label>
+                      <input id="titular" class="form-control" formControlName="titular" autocomplete="cc-name"
+                             [class.is-invalid]="tarjeta.controls.titular.touched && tarjeta.controls.titular.invalid" />
+                    </div>
+                    <div class="col-12">
+                      <label for="numero" class="form-label small">{{ 'checkout.numeroTarjeta' | translate }}</label>
+                      <input id="numero" class="form-control" formControlName="numero" inputmode="numeric" autocomplete="cc-number"
+                             placeholder="4242 4242 4242 4242" (input)="formatearNumero()" aria-describedby="ayuda-tarjeta"
+                             [class.is-invalid]="tarjeta.controls.numero.touched && tarjeta.controls.numero.invalid" />
+                    </div>
+                    <div class="col-6">
+                      <label for="vence" class="form-label small">{{ 'checkout.vence' | translate }}</label>
+                      <input id="vence" class="form-control" formControlName="vence" inputmode="numeric" autocomplete="cc-exp"
+                             placeholder="MM/AA" (input)="formatearVence()"
+                             [class.is-invalid]="tarjeta.controls.vence.touched && tarjeta.controls.vence.invalid" />
+                    </div>
+                    <div class="col-6">
+                      <label for="cvc" class="form-label small">CVC</label>
+                      <input id="cvc" class="form-control" formControlName="cvc" inputmode="numeric" autocomplete="cc-csc" maxlength="4"
+                             placeholder="123" [class.is-invalid]="tarjeta.controls.cvc.touched && tarjeta.controls.cvc.invalid" />
+                    </div>
+                  </div>
+                  <p id="ayuda-tarjeta" class="small text-body-secondary mb-0 mt-2">
+                    <i class="bi bi-shield-lock me-1" aria-hidden="true"></i>{{ 'checkout.sandbox' | translate }}<br />
+                    {{ 'checkout.tarjetasPrueba' | translate }}
+                  </p>
+                </div>
+              }
+
+              <label class="opcion-pago card p-3" [class.border-primary]="metodo() === 'FIADO'" [class.opacity-50]="!alcanzaFiado()">
+                <span class="form-check m-0">
+                  <input class="form-check-input" type="radio" formControlName="metodoPago" value="FIADO" [attr.aria-describedby]="'info-fiado'" [attr.disabled]="alcanzaFiado() ? null : true" />
+                  <span class="form-check-label fw-semibold"><i class="bi bi-journal-text me-1" aria-hidden="true"></i>{{ 'pago.FIADO' | translate }}</span>
+                </span>
+                <span id="info-fiado" class="small ms-4" [class.text-danger]="!alcanzaFiado()" [class.text-body-secondary]="alcanzaFiado()">
+                  {{ 'checkout.fiadoDisponible' | translate: { valor: (fiado.miCuenta().disponible | cop) } }}
+                  @if (!alcanzaFiado()) { · {{ 'checkout.fiadoNoAlcanza' | translate }} }
+                </span>
+              </label>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="col-lg-5">
+        <aside class="card tarjeta-sombra position-sticky" style="top: 1rem">
+          <div class="card-body">
+            <h2 class="h5 fw-bold">{{ 'carrito.resumen' | translate }}</h2>
+            <ul class="list-unstyled small mb-3">
+              @for (i of carrito.items(); track i.productoId) {
+                <li class="d-flex justify-content-between py-1 border-bottom">
+                  <span><span aria-hidden="true"><app-foto-producto [imagen]="i.imagen" [enLinea]="true" /></span> {{ i.cantidad }} × {{ i.nombre }}</span>
+                  <span>{{ i.precio * i.cantidad | cop }}</span>
+                </li>
+              }
+            </ul>
+            <dl class="row mb-0">
+              <dt class="col-7 fw-normal">{{ 'carrito.subtotal' | translate }}</dt><dd class="col-5 text-end">{{ carrito.subtotal() | cop }}</dd>
+              <dt class="col-7 fw-normal">{{ 'carrito.domicilio' | translate }}</dt><dd class="col-5 text-end">{{ carrito.domicilio() | cop }}</dd>
+              <dt class="col-7 fs-5">{{ 'carrito.total' | translate }}</dt><dd class="col-5 text-end fs-5 fw-bold">{{ carrito.total() | cop }}</dd>
+            </dl>
+            <button type="submit" class="btn btn-primary btn-lg w-100 mt-3" [disabled]="enviando()">
+              @if (enviando()) {
+                <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>{{ (metodo() === 'EN_LINEA' ? 'checkout.procesandoPago' : 'checkout.enviando') | translate }}
+              } @else {
+                {{ 'checkout.confirmar' | translate }}
+              }
+            </button>
+            <a routerLink="/carrito" class="btn btn-link w-100 mt-1">{{ 'checkout.volverCarrito' | translate }}</a>
+          </div>
+        </aside>
+      </div>
+    </form>
+  }
+</div>

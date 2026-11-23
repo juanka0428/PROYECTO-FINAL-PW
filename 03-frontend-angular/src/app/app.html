@@ -1,0 +1,31 @@
+<a class="saltar-contenido" href="#contenido" (click)="$event.preventDefault(); principal.focus()">{{ 'acc.saltar' | translate }}</a>
+
+<header>
+  <app-barra-accesibilidad />
+  <app-encabezado />
+</header>
+
+<main id="contenido" #principal tabindex="-1" class="flex-grow-1">
+  <router-outlet />
+</main>
+
+@if (auth.rol() === 'CLIENTE') {
+  <a routerLink="/chat" class="btn btn-acento boton-chat shadow" [attr.aria-label]="'nav.ayuda' | translate">
+    <i class="bi bi-chat-dots-fill" aria-hidden="true"></i>
+  </a>
+}
+
+<footer class="pie mt-5">
+  <div class="container py-4 d-flex flex-column flex-md-row gap-3 justify-content-between align-items-md-center">
+    <div>
+      <strong>{{ config.nombreApp }}</strong> · {{ config.nombreTienda }}<br />
+      <span class="small">{{ 'pie.horario' | translate }}: {{ config.horario }}</span>
+    </div>
+    <div class="small text-md-end">
+      © {{ anio }} · {{ 'pie.proyecto' | translate }}<br />
+      <a class="link-light" href="./creditos-fotos.html">{{ 'pie.creditos' | translate }}</a>
+    </div>
+  </div>
+</footer>
+
+<app-avisos />

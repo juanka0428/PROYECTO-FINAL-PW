@@ -1,0 +1,66 @@
+<div class="container">
+  <div class="titulo-pagina">
+    <h1><i class="bi bi-journal-text text-primario me-1" aria-hidden="true"></i>{{ 'fiado.titulo' | translate }}</h1>
+    <p>{{ 'fiado.subtitulo' | translate }}</p>
+  </div>
+
+  @if (fiado.miCuenta().cupo === 0) {
+    <div class="alert alert-info">{{ 'fiado.sinCupo' | translate: { tienda: config.nombreTienda } }}</div>
+  }
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card tarjeta-sombra h-100"><div class="card-body">
+        <p class="text-body-secondary mb-1">{{ 'fiado.debes' | translate }}</p>
+        <p class="kpi text-danger mb-0">{{ fiado.miCuenta().saldo | cop }}</p>
+      </div></div>
+    </div>
+    <div class="col-md-4">
+      <div class="card tarjeta-sombra h-100"><div class="card-body">
+        <p class="text-body-secondary mb-1">{{ 'fiado.disponible' | translate }}</p>
+        <p class="kpi text-success mb-0">{{ fiado.miCuenta().disponible | cop }}</p>
+      </div></div>
+    </div>
+    <div class="col-md-4">
+      <div class="card tarjeta-sombra h-100"><div class="card-body">
+        <p class="text-body-secondary mb-1">{{ 'fiado.cupo' | translate }}</p>
+        <p class="kpi mb-0">{{ fiado.miCuenta().cupo | cop }}</p>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="card tarjeta-sombra mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between small mb-1"><span>{{ 'fiado.usado' | translate }}</span><span>{{ porcentaje() }} %</span></div>
+      <div class="progress" role="progressbar" [attr.aria-valuenow]="porcentaje()" aria-valuemin="0" aria-valuemax="100" [attr.aria-label]="'fiado.usado' | translate" style="height: 1rem">
+        <div class="progress-bar" [class.bg-danger]="porcentaje() > 80" [class.bg-warning]="porcentaje() > 50 && porcentaje() <= 80" [class.bg-success]="porcentaje() <= 50" [style.width.%]="porcentaje()"></div>
+      </div>
+      <p class="small text-body-secondary mt-3 mb-0"><i class="bi bi-info-circle me-1" aria-hidden="true"></i>{{ 'fiado.comoAbonar' | translate }}</p>
+    </div>
+  </div>
+
+  <h2 class="h5 fw-bold">{{ 'fiado.movimientos' | translate }}</h2>
+  @if (fiado.misMovimientos().length === 0) {
+    <p class="text-body-secondary">{{ 'fiado.sinMovimientos' | translate }}</p>
+  } @else {
+    <div class="card tarjeta-sombra">
+      <table class="table table-hover mb-0 tabla-responsive align-middle">
+        <caption class="visually-hidden">{{ 'fiado.movimientos' | translate }}</caption>
+        <thead><tr><th scope="col">{{ 'comun.fecha' | translate }}</th><th scope="col">{{ 'comun.descripcion' | translate }}</th><th scope="col">{{ 'fiado.tipo' | translate }}</th><th scope="col" class="text-end">{{ 'comun.valor' | translate }}</th></tr></thead>
+        <tbody>
+          @for (m of fiado.misMovimientos(); track m.id) {
+            <tr>
+              <td [attr.data-label]="'comun.fecha' | translate">{{ m.fecha | date: 'mediumDate' }}</td>
+              <td [attr.data-label]="'comun.descripcion' | translate">{{ m.descripcion }}</td>
+              <td [attr.data-label]="'fiado.tipo' | translate">
+                <span class="badge" [class.text-bg-danger]="m.tipo === 'CARGO'" [class.text-bg-success]="m.tipo === 'ABONO'">{{ 'fiado.' + m.tipo | translate }}</span>
+              </td>
+              <td class="text-end fw-semibold" [attr.data-label]="'comun.valor' | translate">{{ m.tipo === 'CARGO' ? '+' : '−' }} {{ m.valor | cop }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+  <a routerLink="/catalogo" class="btn btn-primary mt-4">{{ 'carrito.irCatalogo' | translate }}</a>
+</div>

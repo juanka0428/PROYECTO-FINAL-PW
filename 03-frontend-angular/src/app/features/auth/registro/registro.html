@@ -1,0 +1,75 @@
+<div class="container py-5">
+  <div class="row justify-content-center g-4">
+    <div class="col-lg-4 d-none d-lg-block">
+      <img src="img/albahaca.jpg" class="foto-lateral" alt="Albahaca fresca" />
+    </div>
+    <div class="col-lg-8">
+      <div class="card tarjeta-sombra">
+        <div class="card-body p-4 p-md-5">
+          <h1 class="h3 fw-bold mb-1">{{ 'auth.tituloRegistro' | translate }}</h1>
+          <p class="text-body-secondary mb-4">{{ 'auth.subtituloRegistro' | translate }}</p>
+
+          @if (error()) {
+            <div class="alert alert-danger" role="alert">{{ error()! | translate }}</div>
+          }
+
+          <form [formGroup]="form" (ngSubmit)="enviar()" novalidate class="row g-3">
+            <div class="col-md-6">
+              <label for="nombre" class="form-label">{{ 'auth.nombre' | translate }}</label>
+              <input id="nombre" class="form-control" formControlName="nombre" autocomplete="name" [class.is-invalid]="invalido('nombre')" aria-describedby="e-nombre" />
+              <div id="e-nombre" class="invalid-feedback">{{ 'validacion.nombre' | translate }}</div>
+            </div>
+            <div class="col-md-6">
+              <label for="telefono" class="form-label">{{ 'auth.telefono' | translate }}</label>
+              <input id="telefono" type="tel" class="form-control" formControlName="telefono" autocomplete="tel" placeholder="310 555 1234" [class.is-invalid]="invalido('telefono')" aria-describedby="e-telefono" />
+              <div id="e-telefono" class="invalid-feedback">{{ 'validacion.telefono' | translate }}</div>
+            </div>
+            <div class="col-12">
+              <label for="correo" class="form-label">{{ 'auth.correo' | translate }}</label>
+              <input id="correo" type="email" class="form-control" formControlName="correo" autocomplete="email" [class.is-invalid]="invalido('correo')" aria-describedby="e-correo" />
+              <div id="e-correo" class="invalid-feedback">{{ 'validacion.correo' | translate }}</div>
+            </div>
+            <div class="col-md-8">
+              <label for="direccion" class="form-label">{{ 'auth.direccion' | translate }}</label>
+              <input id="direccion" class="form-control" formControlName="direccion" autocomplete="street-address" placeholder="Calle 8 # 12-34" [class.is-invalid]="invalido('direccion')" aria-describedby="e-direccion" />
+              <div id="e-direccion" class="invalid-feedback">{{ 'validacion.requerido' | translate }}</div>
+            </div>
+            <div class="col-md-4">
+              <label for="barrio" class="form-label">{{ 'auth.barrio' | translate }}</label>
+              <select id="barrio" class="form-select" formControlName="barrio" [class.is-invalid]="invalido('barrio')" aria-describedby="e-barrio">
+                <option value="" disabled>{{ 'comun.seleccione' | translate }}</option>
+                @for (b of barrios; track b) { <option [value]="b">{{ b }}</option> }
+              </select>
+              <div id="e-barrio" class="invalid-feedback">{{ 'validacion.requerido' | translate }}</div>
+            </div>
+            <div class="col-md-6">
+              <label for="clave" class="form-label">{{ 'auth.clave' | translate }}</label>
+              <input id="clave" type="password" class="form-control" formControlName="clave" autocomplete="new-password" [class.is-invalid]="invalido('clave')" aria-describedby="e-clave ayuda-clave" />
+              <div id="ayuda-clave" class="form-text">{{ 'auth.claveAyuda' | translate }}</div>
+              <div id="e-clave" class="invalid-feedback">{{ 'validacion.clave' | translate }}</div>
+            </div>
+            <div class="col-md-6">
+              <label for="confirmar" class="form-label">{{ 'auth.confirmar' | translate }}</label>
+              <input id="confirmar" type="password" class="form-control" formControlName="confirmar" autocomplete="new-password"
+                     [class.is-invalid]="form.controls.confirmar.touched && form.hasError('distintas')" aria-describedby="e-confirmar" />
+              <div id="e-confirmar" class="invalid-feedback">{{ 'validacion.distintas' | translate }}</div>
+            </div>
+            <div class="col-12">
+              <div class="form-check">
+                <input id="acepto" type="checkbox" class="form-check-input" formControlName="acepto" [class.is-invalid]="invalido('acepto')" />
+                <label for="acepto" class="form-check-label">{{ 'auth.acepto' | translate }}</label>
+              </div>
+            </div>
+            <div class="col-12">
+              <button type="submit" class="btn btn-primary btn-lg w-100" [disabled]="cargando()">
+                @if (cargando()) { <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span> }
+                {{ 'auth.crear' | translate }}
+              </button>
+            </div>
+          </form>
+          <p class="mt-4 mb-0 text-center">{{ 'auth.yaTienes' | translate }} <a routerLink="/login">{{ 'auth.entrar' | translate }}</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

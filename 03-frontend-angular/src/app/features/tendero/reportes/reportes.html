@@ -1,0 +1,103 @@
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+  <div>
+    <h1 class="h3 fw-bold mb-0">{{ 'tendero.reportes' | translate }}</h1>
+    <p class="text-body-secondary mb-0">{{ 'reportes.texto' | translate }}</p>
+  </div>
+  <div class="d-flex flex-wrap gap-2 no-imprimir">
+    <div class="btn-group" role="group" [attr.aria-label]="'reportes.periodo' | translate">
+      @for (d of [7, 30, 90]; track d) {
+        <button type="button" class="btn btn-outline-primary" [class.active]="dias() === d" [attr.aria-pressed]="dias() === d" (click)="dias.set(d)">{{ 'reportes.ultimos' | translate: { n: d } }}</button>
+      }
+    </div>
+    <button type="button" class="btn btn-outline-success" (click)="descargar('excel')" [disabled]="descargando() !== null">
+      @if (descargando() === 'excel') { <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> } @else { <i class="bi bi-file-earmark-excel me-1" aria-hidden="true"></i> }{{ 'reportes.excel' | translate }}
+    </button>
+    <button type="button" class="btn btn-outline-danger" (click)="descargar('pdf')" [disabled]="descargando() !== null">
+      @if (descargando() === 'pdf') { <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> } @else { <i class="bi bi-file-earmark-pdf me-1" aria-hidden="true"></i> }{{ 'reportes.pdf' | translate }}
+    </button>
+    <button type="button" class="btn btn-outline-secondary" (click)="exportarCsv()"><i class="bi bi-filetype-csv me-1" aria-hidden="true"></i>{{ 'reportes.csv' | translate }}</button>
+    <button type="button" class="btn btn-outline-secondary" (click)="imprimir()" [attr.aria-label]="'reportes.imprimir' | translate"><i class="bi bi-printer" aria-hidden="true"></i></button>
+  </div>
+</div>
+<p class="solo-imprimir small">{{ 'reportes.generado' | translate }} {{ hoy | date: 'medium' }} · {{ 'reportes.ultimos' | translate: { n: dias() } }}</p>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-xl-3"><div class="card tarjeta-sombra h-100"><div class="card-body"><p class="small text-body-secondary mb-1">{{ 'reportes.ventas' | translate }}</p><p class="kpi mb-0">{{ totalVentas() | cop }}</p></div></div></div>
+  <div class="col-6 col-xl-3"><div class="card tarjeta-sombra h-100"><div class="card-body"><p class="small text-body-secondary mb-1">{{ 'reportes.pedidos' | translate }}</p><p class="kpi mb-0">{{ cantidad() }}</p></div></div></div>
+  <div class="col-6 col-xl-3"><div class="card tarjeta-sombra h-100"><div class="card-body"><p class="small text-body-secondary mb-1">{{ 'reportes.ticket' | translate }}</p><p class="kpi mb-0">{{ ticket() | cop }}</p></div></div></div>
+  <div class="col-6 col-xl-3"><div class="card tarjeta-sombra h-100"><div class="card-body"><p class="small text-body-secondary mb-1">{{ 'reportes.fiado' | translate }}</p><p class="kpi mb-0">{{ vendidoFiado() | cop }}</p></div></div></div>
+</div>
+
+<section class="card tarjeta-sombra mb-4">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center">
+    <h2 class="h6 fw-bold mb-0">{{ 'reportes.porDia' | translate }}</h2>
+    <button type="button" class="btn btn-sm btn-link no-imprimir" (click)="verTabla.set(!verTabla())" [attr.aria-pressed]="verTabla()">
+      {{ (verTabla() ? 'reportes.verGrafico' : 'reportes.verTabla') | translate }}
+    </button>
+  </div>
+  <div class="card-body">
+    @if (!verTabla()) {
+      <div class="grafico-columnas" role="img" [attr.aria-label]="'reportes.porDiaDescripcion' | translate: { total: (totalVentas() | cop) }">
+        @for (b of porDia(); track b.etiqueta) {
+          <div class="columna" tabindex="0" [attr.aria-label]="(b.etiqueta | date: 'mediumDate') + ': ' + (b.valor | cop)">
+            <span class="tooltip-barra">{{ b.etiqueta | date: 'mediumDate' }}<br /><strong>{{ b.valor | cop }}</strong> · {{ b.detalle }} {{ 'reportes.pedidosMin' | translate }}</span>
+            <span class="barra" [style.height.%]="(b.valor / maxDia()) * 100"></span>
+            @if (dias() <= 30 && (dias() <= 7 || $index % 5 === 0)) {
+              <span class="etiqueta">{{ b.etiqueta | date: (dias() <= 7 ? 'EEE d' : 'd MMM') }}</span>
+            }
+          </div>
+        }
+      </div>
+    } @else {
+      <table class="table table-sm mb-0">
+        <caption class="visually-hidden">{{ 'reportes.porDia' | translate }}</caption>
+        <thead><tr><th scope="col">{{ 'comun.fecha' | translate }}</th><th scope="col" class="text-end">{{ 'reportes.pedidos' | translate }}</th><th scope="col" class="text-end">{{ 'reportes.ventas' | translate }}</th></tr></thead>
+        <tbody>
+          @for (b of porDia(); track b.etiqueta) {
+            <tr><td>{{ b.etiqueta | date: 'mediumDate' }}</td><td class="text-end">{{ b.detalle }}</td><td class="text-end">{{ b.valor | cop }}</td></tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</section>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <section class="card tarjeta-sombra h-100">
+      <div class="card-header bg-white"><h2 class="h6 fw-bold mb-0">{{ 'reportes.top' | translate }}</h2></div>
+      <div class="card-body">
+        @for (b of topProductos(); track b.etiqueta) {
+          <div class="fila-barra">
+            <div class="d-flex justify-content-between small"><span>{{ b.etiqueta }}</span><span class="text-body-secondary">{{ b.detalle }} {{ 'reportes.unidades' | translate }} · <strong class="text-body">{{ b.valor | cop }}</strong></span></div>
+            <div class="pista"><span [style.width.%]="(b.valor / max(topProductos())) * 100"></span></div>
+          </div>
+        } @empty { <p class="text-body-secondary mb-0">{{ 'reportes.sinDatos' | translate }}</p> }
+      </div>
+    </section>
+  </div>
+  <div class="col-lg-6 vstack gap-4">
+    <section class="card tarjeta-sombra">
+      <div class="card-header bg-white"><h2 class="h6 fw-bold mb-0">{{ 'reportes.porMetodo' | translate }}</h2></div>
+      <div class="card-body">
+        @for (b of porMetodo(); track b.etiqueta) {
+          <div class="fila-barra">
+            <div class="d-flex justify-content-between small"><span>{{ b.etiqueta | translate }}</span><span class="text-body-secondary">{{ b.detalle }} · <strong class="text-body">{{ b.valor | cop }}</strong></span></div>
+            <div class="pista"><span [style.width.%]="(b.valor / max(porMetodo())) * 100"></span></div>
+          </div>
+        } @empty { <p class="text-body-secondary mb-0">{{ 'reportes.sinDatos' | translate }}</p> }
+      </div>
+    </section>
+    <section class="card tarjeta-sombra">
+      <div class="card-header bg-white"><h2 class="h6 fw-bold mb-0">{{ 'reportes.porOrigen' | translate }}</h2></div>
+      <div class="card-body">
+        @for (b of porOrigen(); track b.etiqueta) {
+          <div class="fila-barra">
+            <div class="d-flex justify-content-between small"><span>{{ b.etiqueta | translate }}</span><span class="text-body-secondary">{{ b.detalle }} · <strong class="text-body">{{ b.valor | cop }}</strong></span></div>
+            <div class="pista"><span [style.width.%]="(b.valor / max(porOrigen())) * 100"></span></div>
+          </div>
+        } @empty { <p class="text-body-secondary mb-0">{{ 'reportes.sinDatos' | translate }}</p> }
+      </div>
+    </section>
+  </div>
+</div>

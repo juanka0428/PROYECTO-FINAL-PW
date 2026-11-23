@@ -1,0 +1,147 @@
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+  <div>
+    <h1 class="h3 fw-bold mb-0">{{ 'tendero.productos' | translate }}</h1>
+    <p class="text-body-secondary mb-0">{{ 'productos.texto' | translate: { n: productos.todos().length } }}</p>
+  </div>
+  <div class="d-flex gap-2">
+    <label for="buscar-prod" class="visually-hidden">{{ 'catalogo.buscar' | translate }}</label>
+    <input id="buscar-prod" type="search" class="form-control" [placeholder]="'catalogo.buscar' | translate" (input)="buscar($event)" />
+    <button type="button" class="btn btn-primary text-nowrap" (click)="nuevo()"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>{{ 'productos.nuevo' | translate }}</button>
+  </div>
+</div>
+
+<div class="card tarjeta-sombra">
+  <div class="table-responsive-md">
+    <table class="table table-hover align-middle mb-0 tabla-responsive">
+      <caption class="visually-hidden">{{ 'tendero.productos' | translate }}</caption>
+      <thead class="table-light">
+        <tr>
+          <th scope="col">{{ 'productos.producto' | translate }}</th>
+          <th scope="col">{{ 'productos.categoria' | translate }}</th>
+          <th scope="col" class="text-end">{{ 'productos.precio' | translate }}</th>
+          <th scope="col" class="text-end">{{ 'productos.stock' | translate }}</th>
+          <th scope="col">{{ 'productos.estado' | translate }}</th>
+          <th scope="col" class="text-end">{{ 'comun.acciones' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of lista(); track p.id) {
+          <tr>
+            <td [attr.data-label]="'productos.producto' | translate"><span aria-hidden="true" class="me-2"><app-foto-producto [imagen]="p.imagen" [enLinea]="true" /></span><strong>{{ p.nombre }}</strong></td>
+            <td [attr.data-label]="'productos.categoria' | translate">{{ 'cat.' + p.categoriaId | translate }}</td>
+            <td class="text-end" [attr.data-label]="'productos.precio' | translate">{{ p.precio | cop }}</td>
+            <td class="text-end" [attr.data-label]="'productos.stock' | translate">
+              <span [class.text-danger]="p.stock <= p.stockMinimo" [class.fw-bold]="p.stock <= p.stockMinimo">{{ p.stock }}</span>
+              @if (p.stock <= p.stockMinimo) { <i class="bi bi-exclamation-triangle-fill text-warning ms-1" [title]="'productos.bajo' | translate"></i><span class="visually-hidden">{{ 'productos.bajo' | translate }}</span> }
+            </td>
+            <td [attr.data-label]="'productos.estado' | translate">
+              <span class="badge" [class.text-bg-success]="p.activo" [class.text-bg-secondary]="!p.activo">{{ (p.activo ? 'productos.activo' : 'productos.inactivo') | translate }}</span>
+            </td>
+            <td class="text-end text-nowrap" [attr.data-label]="'comun.acciones' | translate">
+              <button type="button" class="btn btn-sm btn-outline-primary me-1" (click)="editar(p)" [attr.aria-label]="('comun.editar' | translate) + ' ' + p.nombre"><i class="bi bi-pencil" aria-hidden="true"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-danger" (click)="aEliminar.set(p)" [attr.aria-label]="('comun.eliminar' | translate) + ' ' + p.nombre"><i class="bi bi-trash3" aria-hidden="true"></i></button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+@if (modalAbierto()) {
+  <div class="modal modal-propio" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="titulo-modal" (keydown.escape)="cerrar()">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <form class="modal-content" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+        <div class="modal-header">
+          <h2 class="modal-title h5" id="titulo-modal">{{ (editando() ? 'productos.editar' : 'productos.nuevo') | translate }}</h2>
+          <button type="button" class="btn-close" (click)="cerrar()" [attr.aria-label]="'comun.cerrar' | translate"></button>
+        </div>
+        <div class="modal-body row g-3">
+          <div class="col-md-8">
+            <label for="f-nombre" class="form-label">{{ 'productos.nombre' | translate }}</label>
+            <input id="f-nombre" class="form-control" formControlName="nombre" [class.is-invalid]="invalido('nombre')" />
+            <div class="invalid-feedback">{{ 'validacion.requerido' | translate }}</div>
+          </div>
+          <div class="col-md-4">
+            <label for="f-imagen" class="form-label">{{ 'productos.imagen' | translate }}</label>
+            <div class="d-flex gap-2 align-items-center">
+              <div class="img-producto pequena" aria-hidden="true"><app-foto-producto [imagen]="form.controls.imagen.value" /></div>
+              <input id="f-imagen" class="form-control" formControlName="imagen" aria-describedby="ay-imagen" />
+            </div>
+            <div id="ay-imagen" class="form-text">{{ 'productos.imagenAyuda' | translate }}</div>
+            @if (editando()) {
+              <label class="btn btn-sm btn-outline-primary mt-2 mb-0">
+                @if (subiendo()) { <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> }
+                @else { <i class="bi bi-camera me-1" aria-hidden="true"></i> }{{ 'productos.subirFoto' | translate }}
+                <input type="file" accept="image/jpeg,image/png,image/webp" class="visually-hidden" (change)="subirFoto($event)" />
+              </label>
+              <div class="form-text">{{ 'productos.fotoAyuda' | translate }}</div>
+            }
+          </div>
+          <div class="col-md-6">
+            <label for="f-cat" class="form-label">{{ 'productos.categoria' | translate }}</label>
+            <select id="f-cat" class="form-select" formControlName="categoriaId" [class.is-invalid]="invalido('categoriaId')">
+              <option value="" disabled>{{ 'comun.seleccione' | translate }}</option>
+              @for (c of productos.categorias(); track c.id) { <option [value]="c.id">{{ c.icono }} {{ 'cat.' + c.id | translate }}</option> }
+            </select>
+            <div class="invalid-feedback">{{ 'validacion.requerido' | translate }}</div>
+          </div>
+          <div class="col-md-6">
+            <label for="f-unidad" class="form-label">{{ 'productos.unidad' | translate }}</label>
+            <input id="f-unidad" class="form-control" formControlName="unidad" />
+          </div>
+          <div class="col-md-4">
+            <label for="f-precio" class="form-label">{{ 'productos.precio' | translate }}</label>
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              <input id="f-precio" type="number" min="0" step="100" class="form-control" formControlName="precio" [class.is-invalid]="invalido('precio')" />
+              <div class="invalid-feedback">{{ 'validacion.precio' | translate }}</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label for="f-stock" class="form-label">{{ 'productos.stock' | translate }}</label>
+            <input id="f-stock" type="number" min="0" class="form-control" formControlName="stock" [class.is-invalid]="invalido('stock')" />
+          </div>
+          <div class="col-md-4">
+            <label for="f-min" class="form-label">{{ 'productos.stockMinimo' | translate }}</label>
+            <input id="f-min" type="number" min="0" class="form-control" formControlName="stockMinimo" />
+          </div>
+          <div class="col-12">
+            <label for="f-claves" class="form-label">{{ 'productos.palabras' | translate }}</label>
+            <input id="f-claves" class="form-control" formControlName="palabrasClave" aria-describedby="ay-claves" />
+            <div id="ay-claves" class="form-text">{{ 'productos.palabrasAyuda' | translate }}</div>
+          </div>
+          <div class="col-12">
+            <div class="form-check form-switch">
+              <input id="f-activo" type="checkbox" role="switch" class="form-check-input" formControlName="activo" />
+              <label for="f-activo" class="form-check-label">{{ 'productos.visible' | translate }}</label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" (click)="cerrar()">{{ 'comun.cancelar' | translate }}</button>
+          <button type="submit" class="btn btn-primary" [disabled]="guardando()">
+            @if (guardando()) { <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> }{{ 'comun.guardar' | translate }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (aEliminar(); as p) {
+  <div class="modal modal-propio" tabindex="-1" role="alertdialog" aria-modal="true" aria-labelledby="titulo-eliminar" (keydown.escape)="aEliminar.set(null)">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body p-4">
+          <h2 id="titulo-eliminar" class="h5 fw-bold">{{ 'productos.confirmarTitulo' | translate }}</h2>
+          <p class="mb-0">{{ 'productos.confirmarTexto' | translate: { nombre: p.nombre } }}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" (click)="aEliminar.set(null)">{{ 'comun.cancelar' | translate }}</button>
+          <button type="button" class="btn btn-danger" (click)="confirmarEliminar()">{{ 'comun.eliminar' | translate }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

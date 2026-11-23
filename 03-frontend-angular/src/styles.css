@@ -1,0 +1,123 @@
+@font-face { font-family: "Nunito"; font-weight: 400; src: url("/fuentes/nunito-latin-400-normal.woff2"); }
+@font-face { font-family: "Nunito"; font-weight: 600; src: url("/fuentes/nunito-latin-600-normal.woff2"); }
+@font-face { font-family: "Nunito"; font-weight: 700; src: url("/fuentes/nunito-latin-700-normal.woff2"); }
+@font-face { font-family: "Montserrat"; font-weight: 800; src: url("/fuentes/montserrat-latin-800-normal.woff2"); }
+
+:root {
+  --tc-primario: #035a2c;
+  --tc-primario-oscuro: #02431f;
+  --tc-acento: #fccf00;
+  --tc-limon: #8cbf3f;
+  --tc-oscuro: #1b2e20;
+  --tc-fondo: #f5f9ef;
+  --tc-fondo-suave: #e6f1da;
+  --tc-borde: #cfe0bd;
+  --tc-texto: #1b2e20;
+  --tc-texto-suave: #4d5f50;
+  --tc-radio: 1.2rem;
+  --tc-escala: 1;
+  --tc-titulos: "Nunito", "Segoe UI", sans-serif;
+  --tc-logo: "Montserrat", "Segoe UI", sans-serif;
+
+  --bs-body-bg: var(--tc-fondo);
+  --bs-body-color: var(--tc-texto);
+  --bs-primary: var(--tc-primario);
+  --bs-primary-rgb: 3, 90, 44;
+  --bs-link-color: var(--tc-primario);
+  --bs-link-color-rgb: 3, 90, 44;
+  --bs-link-hover-color: var(--tc-oscuro);
+  --bs-border-color: var(--tc-borde);
+  --bs-border-radius: .7rem;
+  --bs-font-sans-serif: "Nunito", "Segoe UI", Arial, sans-serif;
+}
+
+h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5, .kpi { font-family: var(--tc-titulos); font-weight: 700; }
+
+.logo-agropita { font-family: var(--tc-logo); font-weight: 800; font-size: 1.6rem; }
+.logo-agropita .agro { color: var(--tc-limon); }
+.logo-agropita .pita { color: var(--tc-primario); }
+.logo-agropita img { width: 1.4rem; vertical-align: -.15rem; }
+
+html { font-size: calc(16px * var(--tc-escala)); }
+body { background: var(--tc-fondo); }
+
+.btn-primary {
+  --bs-btn-bg: var(--tc-primario); --bs-btn-border-color: var(--tc-primario);
+  --bs-btn-hover-bg: var(--tc-primario-oscuro); --bs-btn-hover-border-color: var(--tc-primario-oscuro);
+  --bs-btn-active-bg: var(--tc-primario-oscuro); --bs-btn-active-border-color: var(--tc-primario-oscuro);
+  --bs-btn-disabled-bg: var(--tc-primario); --bs-btn-disabled-border-color: var(--tc-primario);
+}
+.btn-outline-primary {
+  --bs-btn-color: var(--tc-primario); --bs-btn-border-color: var(--tc-primario);
+  --bs-btn-hover-bg: var(--tc-primario); --bs-btn-hover-border-color: var(--tc-primario);
+  --bs-btn-active-bg: var(--tc-primario); --bs-btn-active-border-color: var(--tc-primario);
+}
+.btn-acento {
+  --bs-btn-bg: var(--tc-acento); --bs-btn-border-color: var(--tc-acento); --bs-btn-color: var(--tc-oscuro);
+  --bs-btn-hover-bg: #e8bd00; --bs-btn-hover-border-color: #e8bd00; --bs-btn-hover-color: var(--tc-oscuro);
+  --bs-btn-active-bg: #e8bd00; --bs-btn-active-color: var(--tc-oscuro);
+}
+.bg-acento { background: var(--tc-acento) !important; color: var(--tc-oscuro) !important; }
+.text-primario { color: var(--tc-primario) !important; }
+.form-check-input:checked { background-color: var(--tc-primario); border-color: var(--tc-primario); }
+.nav-pills { --bs-nav-pills-link-active-bg: var(--tc-primario); }
+.nav-pills .nav-link:not(.active) { color: var(--tc-primario-oscuro); }
+.nav-pills .nav-link:not(.active):hover { background: var(--tc-fondo-suave); }
+
+.card { --bs-card-border-color: var(--tc-borde); --bs-card-border-radius: var(--tc-radio); --bs-card-bg: #fff; }
+.tarjeta-sombra { box-shadow: 0 2px 10px rgba(0, 0, 0, .06); }
+
+.titulo-pagina { padding: 1.75rem 0 1rem; }
+.titulo-pagina h1 { font-size: calc(1.4rem + .6vw); font-weight: 700; margin: 0; color: var(--tc-primario); }
+.titulo-pagina h1::before { content: ""; display: inline-block; width: 2.2rem; height: .7rem; background: var(--tc-acento); margin-right: .75rem; }
+.titulo-pagina p { color: var(--tc-texto-suave); margin: .25rem 0 0; }
+
+.img-producto { font-size: 2.6rem; line-height: 1; display: grid; place-items: center; background: var(--tc-fondo-suave); border-radius: .75rem; aspect-ratio: 1; }
+.img-producto { overflow: hidden; }
+.img-producto app-foto-producto { display: grid; place-items: center; width: 100%; height: 100%; }
+.img-producto.pequena { font-size: 1.5rem; width: 2.75rem; flex: 0 0 2.75rem; }
+
+.foto-lateral { width: 100%; height: 100%; object-fit: cover; border-radius: var(--tc-radio); border-bottom: 8px solid var(--tc-acento); }
+
+.kpi { font-size: 1.75rem; font-weight: 700; }
+
+:focus-visible { outline: 3px solid var(--tc-acento) !important; outline-offset: 2px; box-shadow: none !important; }
+.saltar-contenido { position: absolute; left: .5rem; top: -3rem; z-index: 2000; background: var(--tc-acento); color: var(--tc-oscuro); padding: .5rem 1rem; border-radius: .5rem; font-weight: 700; }
+.saltar-contenido:focus { top: .5rem; }
+
+.marcador-mapa { font-size: 1.6rem; background: #fff; border-radius: 50%; border: 2px solid var(--tc-primario); display: grid !important; place-items: center; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+
+.modal-propio { display: block; background: rgba(0, 0, 0, .45); }
+
+@media (max-width: 767.98px) {
+  .tabla-responsive thead { display: none; }
+  .tabla-responsive tr { display: block; border: 1px solid var(--tc-borde); border-radius: .75rem; margin-bottom: .75rem; background: #fff; padding: .5rem; }
+  .tabla-responsive td { display: flex; justify-content: space-between; gap: 1rem; border: 0; padding: .35rem .5rem; text-align: right; }
+  .tabla-responsive td::before { content: attr(data-label); font-weight: 600; text-align: left; color: var(--tc-texto-suave); }
+}
+
+.alto-contraste {
+  --tc-primario: #000; --tc-primario-oscuro: #000; --tc-acento: #ffd400; --tc-oscuro: #000;
+  --tc-fondo: #fff; --tc-fondo-suave: #fff; --tc-borde: #000; --tc-texto: #000; --tc-texto-suave: #000;
+  --bs-primary-rgb: 0, 0, 0; --bs-link-color: #0000c8; --bs-link-color-rgb: 0, 0, 200; --bs-secondary-color: #000;
+}
+.alto-contraste body { background: #fff; color: #000; }
+.alto-contraste .logo-agropita .agro, .alto-contraste .logo-agropita .pita { color: #000; }
+.alto-contraste .card, .alto-contraste .form-control, .alto-contraste .form-select, .alto-contraste .btn, .alto-contraste .badge { border: 2px solid #000 !important; }
+.alto-contraste a:not(.btn) { text-decoration: underline; }
+.alto-contraste .text-body-secondary, .alto-contraste .text-muted { color: #000 !important; }
+.alto-contraste .text-bg-warning, .alto-contraste .text-bg-info, .alto-contraste .text-bg-secondary, .alto-contraste .text-bg-success, .alto-contraste .text-bg-danger, .alto-contraste .bg-acento { background: #fff !important; color: #000 !important; }
+
+.sin-movimiento *, .sin-movimiento *::before, .sin-movimiento *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+.border-dashed { border-style: dashed !important; }
+.opcion-pago { cursor: pointer; }
+
+@media print {
+  header, footer, .menu-panel, .boton-chat, app-avisos, .saltar-contenido { display: none !important; }
+  body { background: #fff; }
+  .card { box-shadow: none !important; break-inside: avoid; }
+}

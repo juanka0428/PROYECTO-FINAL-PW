@@ -1,0 +1,48 @@
+<div class="container">
+  <div class="titulo-pagina">
+    <h1><i class="bi bi-arrow-repeat text-primario me-1" aria-hidden="true"></i>{{ 'recurrentes.titulo' | translate }}</h1>
+    <p>{{ 'recurrentes.subtitulo' | translate }}</p>
+  </div>
+
+  @if (recurrentes.misRecurrentes().length === 0) {
+    <div class="card text-center py-5">
+      <div class="display-4" aria-hidden="true">🗓️</div>
+      <p>{{ 'recurrentes.vacio' | translate }}</p>
+      <a routerLink="/catalogo" class="btn btn-primary mx-auto">{{ 'carrito.irCatalogo' | translate }}</a>
+    </div>
+  }
+
+  <div class="row g-3">
+    @for (r of recurrentes.misRecurrentes(); track r.id) {
+      <div class="col-md-6">
+        <article class="card tarjeta-sombra h-100" [class.opacity-75]="!r.activo">
+          <div class="card-body d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-start gap-2">
+              <h2 class="h5 fw-bold mb-1">{{ r.nombre }}</h2>
+              <div class="form-check form-switch m-0">
+                <input class="form-check-input" type="checkbox" role="switch" [id]="'act-' + r.id" [checked]="r.activo" (change)="alternar(r)" />
+                <label class="form-check-label small" [for]="'act-' + r.id">{{ (r.activo ? 'recurrentes.activo' : 'recurrentes.pausadoEtiqueta') | translate }}</label>
+              </div>
+            </div>
+            <p class="small text-body-secondary">
+              <i class="bi bi-calendar-event me-1" aria-hidden="true"></i>{{ 'recurrentes.' + r.frecuencia | translate }} · {{ 'dias.' + r.dia | translate }}
+            </p>
+            <ul class="list-unstyled small mb-3">
+              @for (i of r.items; track i.productoId) {
+                <li><span aria-hidden="true"><app-foto-producto [imagen]="i.imagen" [enLinea]="true" /></span> {{ i.cantidad }} × {{ i.nombre }}</li>
+              }
+            </ul>
+            <div class="mt-auto d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <span class="fw-bold">{{ total(r) | cop }}</span>
+              <div class="d-flex gap-2">
+                <button type="button" class="btn btn-sm btn-outline-danger" (click)="eliminar(r)" [attr.aria-label]="('comun.eliminar' | translate) + ' ' + r.nombre"><i class="bi bi-trash3" aria-hidden="true"></i></button>
+                <button type="button" class="btn btn-sm btn-primary" (click)="pedirAhora(r)">{{ 'recurrentes.pedirAhora' | translate }}</button>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    }
+  </div>
+  <p class="small text-body-secondary mt-4"><i class="bi bi-info-circle me-1" aria-hidden="true"></i>{{ 'recurrentes.nota' | translate }}</p>
+</div>

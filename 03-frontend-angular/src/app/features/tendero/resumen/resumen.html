@@ -1,0 +1,70 @@
+<div class="mb-4">
+  <h1 class="h3 fw-bold mb-0">{{ 'tendero.hola' | translate: { nombre: auth.usuario()?.nombre?.split(' ')?.[0] } }}</h1>
+  <p class="text-body-secondary">{{ 'tendero.resumenTexto' | translate }}</p>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-xl-3"><div class="card tarjeta-sombra h-100"><div class="card-body">
+    <p class="small text-body-secondary mb-1"><i class="bi bi-receipt me-1" aria-hidden="true"></i>{{ 'tendero.pedidosHoy' | translate }}</p>
+    <p class="kpi mb-0">{{ pedidosHoy() }}</p></div></div></div>
+  <div class="col-6 col-xl-3"><div class="card tarjeta-sombra h-100"><div class="card-body">
+    <p class="small text-body-secondary mb-1"><i class="bi bi-cash-stack me-1" aria-hidden="true"></i>{{ 'tendero.ventasHoy' | translate }}</p>
+    <p class="kpi mb-0">{{ ventasHoy() | cop }}</p></div></div></div>
+  <div class="col-6 col-xl-3"><div class="card tarjeta-sombra h-100"><div class="card-body">
+    <p class="small text-body-secondary mb-1"><i class="bi bi-hourglass-split me-1" aria-hidden="true"></i>{{ 'tendero.porDespachar' | translate }}</p>
+    <p class="kpi mb-0">{{ pendientes().length }}</p></div></div></div>
+  <div class="col-6 col-xl-3"><div class="card tarjeta-sombra h-100"><div class="card-body">
+    <p class="small text-body-secondary mb-1"><i class="bi bi-journal-text me-1" aria-hidden="true"></i>{{ 'tendero.cartera' | translate }}</p>
+    <p class="kpi mb-0 text-danger">{{ fiado.carteraTotal() | cop }}</p></div></div></div>
+</div>
+
+<div class="row g-4">
+  <div class="col-xl-7">
+    <div class="card tarjeta-sombra h-100">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h2 class="h6 fw-bold mb-0">{{ 'tendero.enCurso' | translate }}</h2>
+        <a routerLink="/tendero/pedidos" class="small">{{ 'comun.verTodos' | translate }}</a>
+      </div>
+      <ul class="list-group list-group-flush">
+        @for (p of pendientes(); track p.id) {
+          <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+              <strong>{{ p.codigo }}</strong> · {{ p.clienteNombre }}
+              <div class="small text-body-secondary">{{ p.barrio }} · {{ p.fecha | date: 'shortTime' }} · {{ 'pago.' + p.metodoPago | translate }}</div>
+            </div>
+            <div class="d-flex align-items-center gap-2"><span class="fw-semibold">{{ p.total | cop }}</span><app-estado-badge [estado]="p.estado" /></div>
+          </li>
+        } @empty {
+          <li class="list-group-item text-body-secondary">{{ 'tendero.sinPendientes' | translate }}</li>
+        }
+      </ul>
+    </div>
+  </div>
+  <div class="col-xl-5">
+    <div class="card tarjeta-sombra mb-4">
+      <div class="card-header bg-white"><h2 class="h6 fw-bold mb-0"><i class="bi bi-exclamation-triangle text-warning me-1" aria-hidden="true"></i>{{ 'tendero.porAgotarse' | translate }}</h2></div>
+      <ul class="list-group list-group-flush">
+        @for (p of productos.bajoStock(); track p.id) {
+          <li class="list-group-item d-flex justify-content-between">
+            <span><span aria-hidden="true"><app-foto-producto [imagen]="p.imagen" [enLinea]="true" /></span> {{ p.nombre }}</span>
+            <span class="badge text-bg-danger align-self-center">{{ 'tendero.quedan' | translate: { n: p.stock } }}</span>
+          </li>
+        } @empty {
+          <li class="list-group-item text-body-secondary">{{ 'tendero.stockBien' | translate }}</li>
+        }
+      </ul>
+    </div>
+    <div class="card tarjeta-sombra">
+      <div class="card-header bg-white"><h2 class="h6 fw-bold mb-0"><i class="bi bi-person-exclamation me-1" aria-hidden="true"></i>{{ 'tendero.fiadoAlto' | translate }}</h2></div>
+      <ul class="list-group list-group-flush">
+        @for (c of clientesCerca(); track c.id) {
+          <li class="list-group-item d-flex justify-content-between">
+            <span>{{ c.nombre }}</span><span class="small">{{ c.saldoFiado | cop }} / {{ c.cupoFiado | cop }}</span>
+          </li>
+        } @empty {
+          <li class="list-group-item text-body-secondary">{{ 'tendero.fiadoBien' | translate }}</li>
+        }
+      </ul>
+    </div>
+  </div>
+</div>
